@@ -37,14 +37,16 @@ def ck2yaml(request, pk):
     import traceback
     import logging
 
-    parser = Parser()
+
     input_file = mechanism.ck_mechanism_file.path
     thermo_file =  mechanism.ck_thermo_file.path if mechanism.ck_thermo_file else None
     transport_file = mechanism.ck_transport_file.path if mechanism.ck_transport_file else None
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
     phase_name = None # will default to 'gas'
     out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
-
+    error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
+    open(error_filename, "w").close() # wipes the file it already existed.
+    parser = Parser()
 
     try:
         parser.convert_mech(input_file, 
@@ -57,8 +59,8 @@ def ck2yaml(request, pk):
                         permissive = True,
                         )
     except Exception as e:
-        error = os.path.join(os.path.split(input_file)[0], 'error.txt')
-        with open(error, "r") as err:
+        
+        with open(error_filename, "r") as err:
             content = err.read()
         conversion_log += str(content)
         conversion_log += str(e)                      
@@ -67,7 +69,7 @@ def ck2yaml(request, pk):
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
-        open (error, "w").close()
+        
     else:
         mechanism.ct_mechanism_file = out_name
         mechanism.save()
