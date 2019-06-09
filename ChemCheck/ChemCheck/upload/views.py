@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from .forms import Chemkinupload
+from .models import Chemkin
 from django.http import HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
+
 # Create your views here.
 
 class Home(TemplateView):
@@ -13,13 +15,25 @@ class Home(TemplateView):
 def upload(request):
     if request.method == 'POST':
         form = Chemkinupload(request.POST, request.FILES)
-        if form.is_valid():
+        if form.is_valid:
             form.save()
+            return HttpResponseRedirect('/list/')
     else:
         form = Chemkinupload()
     return render(request, 'upload.html', {
         'form': form
     })
+
+
+def upload_list(request):
+    uploaded_files = Chemkin.objects.all()
+    return render(request, 'list.html', {
+        'uploaded_files': uploaded_files
+    })
+    
+
+def ace(request):
+    return render(request, 'ace.html', {})
 
 
     #class FileFieldView(FormView): 
