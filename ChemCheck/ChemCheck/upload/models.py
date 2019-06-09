@@ -16,3 +16,6 @@ class Chemkin(models.Model):
     surface_file = models.FileField(upload_to='uploads/%Y%m%d-%H%M%S/surf.inp', max_length=100, blank=True)
     timestamps = models.DateTimeField(auto_now_add=True)
 
+    def get_absolute_url(self):
+        return 'uploads/%Y%m%d-%H%M%S/chem.inp'
+

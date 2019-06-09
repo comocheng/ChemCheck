@@ -10,7 +10,7 @@
     <tbody>
         {% for file in uploaded_files %}
           <tr>
-            <td> <a href="{{MEDIA_URL}}{{ file.mechanism_file }}">{{ file.mechanism_file.name }}</a> <button>edit</button></td>
+            <td> <a href="{{ get_absolute_url }}">{{ file.mechanism_file }}</a> <button>edit</button></td>
             <td><button>Download</button></td>
             
           </tr>
