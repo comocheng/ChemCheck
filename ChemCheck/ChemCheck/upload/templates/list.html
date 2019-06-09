@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table>
+    <tr>
+        <th>File name</th>
+    </tr>
+    
+
+    <tbody>
+        {% for file in uploaded_files %}
+          <tr>
+            <td> <a href="{{MEDIA_URL}}{{ file.mechanism_file }}">{{ file.mechanism_file.name }}</a> <button>edit</button></td>
+            <td><button>Download</button></td>
+            
+          </tr>
+        {% endfor %}
+    </tbody>   
+</table>
+
+
+{% endblock %}
