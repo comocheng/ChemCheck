@@ -5,16 +5,13 @@
     <tr>
         <th>File name</th>
     </tr>
-    
-
     <tbody>
-        {% for file in uploaded_files %}
-          <tr>
-            <td> <a href="{{ get_absolute_url }}">{{ file.mechanism_file }}</a> <button>edit</button></td>
-            <td><button>Download</button></td>
-            
-          </tr>
-        {% endfor %}
+      {% for mechanism in mechanisms %}
+      <tr>
+        <td><a href="{{ mechanism.get_absolute_url }}">{{ mechanism.id }}</a></td>
+        <td>{{ mechanism.mechanism_file }}</td>
+      </tr>
+      {% endfor %}
     </tbody>   
 </table>
 
