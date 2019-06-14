@@ -8,7 +8,9 @@ def upload_to(instance, filename):
     return 'uploads/{id}/{fn}'.format(id=instance.pk,fn=filename)
 
 class Chemkin(models.Model):
-
+    """
+    A Chemkin mechanism
+    """
     mechanism_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True)
     thermo_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True)
     transport_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True)
@@ -16,7 +18,7 @@ class Chemkin(models.Model):
     timestamps = models.DateTimeField(auto_now_add=True)
 
     def get_absolute_url(self):
-        return 'uploads/%Y%m%d-%H%M%S/chem.inp'
+        return 'uploads/{self.id}/'
 
 
     def save(self, *args, **kwargs):

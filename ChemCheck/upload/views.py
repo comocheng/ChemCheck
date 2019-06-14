@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView
 from .forms import Chemkinupload
 from .models import Chemkin
 from django.http import HttpResponseRedirect
@@ -25,12 +25,15 @@ def upload(request):
     })
 
 
-def upload_list(request):
-    uploaded_files = Chemkin.objects.all()
+def mechanisms_list(request):
+    mechanisms = Chemkin.objects.all()
     return render(request, 'list.html', {
-        'uploaded_files': uploaded_files
+        'mechanisms': mechanisms
     })
     
+class MechanismDetailView(DetailView):
+    model = Chemkin
+
 
 def ace(request):
     return render(request, 'ace.html', {})
