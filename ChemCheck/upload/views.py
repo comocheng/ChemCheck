@@ -9,8 +9,7 @@ from django.core.files.storage import FileSystemStorage
 
 class Home(TemplateView):
     template_name = 'home.html'
-    #pass
-
+   
 
 def upload(request):
     if request.method == 'POST':
@@ -25,14 +24,17 @@ def upload(request):
     })
 
 
-def mechanisms_list(request):
-    mechanisms = Chemkin.objects.all()
-    return render(request, 'list.html', {
-        'mechanisms': mechanisms
-    })
+#def mechanisms_list(request):
+   # mechanisms = Chemkin.objects.all()
+    #return render(request, 'list.html', {
+     #   'mechanisms': mechanisms
+    #})
+def upload_list(request):
+    uploaded_files = Chemkin.objects.all()
+    return render(request, 'list.html', { 'uploaded_files': uploaded_files })
     
-class MechanismDetailView(DetailView):
-    model = Chemkin
+#class MechanismDetailView(DetailView):
+    #model = Chemkin
 
 
 def ace(request):
