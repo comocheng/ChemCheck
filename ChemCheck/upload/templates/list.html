@@ -1,21 +1,56 @@
+
 {% extends 'base.html' %}
+{% block card-body %}{% endblock %}
 
 {% block content %}
-<table>
+<table class="table table-striped">
+  <thead>
     <tr>
-        <th>File name</th>
+        <th>Mechanism</th>
+        <th>Thermo</th>
+        <th>Transport</th>
+        <th>Surface</th>
     </tr>
-    
+  </thead>
+  <tbody>
+    {% for file in uploaded_files %}
+      <tr>
+        <td>
+          {% if file.mechanism_file %}
+            <a href="{{ file.mechanism_file.url }}">{{ file.mechanism_file }}</a>
+            <button type="button" class="btn btn-primary btn-sm">Edit</button>
+          {% else %}
+            <span class="text-muted">No File Attached</span>
+          {% endif %} 
+        </td>
+        <td>
+          {% if file.thermo_file %}
+          <a href="{{ file.thermo_file.url }}">{{ file.thermo_file }}</a>
+          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% else %}
+            <span class="text-muted">No File Attached</span>
+          {% endif %}  
+        </td>
+        <td>
+          {% if file.transport_file %}
+          <a href="{{ file.transport_file.url }}">{{ file.transport_file }}</a>
+          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% else %}
+            <span class="text-muted">No File Attached</span>
+          {% endif %}  
+        </td>
+        <td>
+          {% if file.surface_file %}
+          <a href="{{ file.surface_file.url }}">{{ file.surface_file }}</a>
+          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% else %}
+            <span class="text-muted">No File Attached</span>
+          {% endif %}  
+        </td>
+      </tr>
+    {% endfor %}
 
-    <tbody>
-        {% for file in uploaded_files %}
-          <tr>
-            <td> <a href="{{ get_absolute_url }}">{{ file.mechanism_file }}</a> <button>edit</button></td>
-            <td><button>Download</button></td>
-            
-          </tr>
-        {% endfor %}
-    </tbody>   
+  </tbody>   
 </table>
 
 

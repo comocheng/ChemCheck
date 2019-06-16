@@ -27,9 +27,8 @@ def upload(request):
 
 def upload_list(request):
     uploaded_files = Chemkin.objects.all()
-    return render(request, 'list.html', {
-        'uploaded_files': uploaded_files
-    })
+    return render(request, 'list.html', { 'uploaded_files': uploaded_files })
+    
     
 
 def ace(request):
