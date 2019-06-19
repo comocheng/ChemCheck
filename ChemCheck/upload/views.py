@@ -27,7 +27,7 @@ def upload(request):
 def ck2yaml(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
 
-    conversion_log = "Success!!! (just kidding)"
+    conversion_log = "Going to try this..."
 
     from .ck2yaml import Parser
     parser = Parser()
@@ -37,10 +37,10 @@ def ck2yaml(request, pk):
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
     phase_name = None # will default to 'gas'
     out_name = os.path.join(os.path.split(input_file)[0], 'cantera.yaml')
-    mechanism.ct_mechanism_file = out_name
-    mechanism.save()
 
-    parser.convert_mech(input_file, 
+
+    try:
+        parser.convert_mech(input_file, 
                         thermo_file, 
                         transport_file,
                         surface_file,
@@ -49,8 +49,14 @@ def ck2yaml(request, pk):
                         quiet = False,
                         permissive = True,
                         )
-
-    conversion_log += f"\n Saved to {out_name}"
+    except Exception as e:
+        conversion_log += str(e)
+        mechanism.ct_conversion_errors = str(e)
+        mechanism.save()
+    else:
+        mechanism.ct_mechanism_file = out_name
+        mechanism.save()
+        conversion_log += f"\n Saved to {out_name}"
 
     return render(request, 'ck2yaml.html', {
        'mech': mechanism,
