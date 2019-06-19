@@ -12,35 +12,35 @@
     </tr>
   </thead>
   <tbody>
-    {% for file in uploaded_files %}
+    {% for mech in mechanisms %}
       <tr>
         <td>
-          {% if file.mechanism_file %}
-            <a href="{{ file.mechanism_file.url }}">{{ file.mechanism_file }}</a>
+          {% if mech.ck_mechanism_file %}
+            <a href="{{ mech.ck_mechanism_file.url }}">{{ mech.ck_mechanism_file }}</a>
             <button type="button" class="btn btn-primary btn-sm">Edit</button>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %} 
         </td>
         <td>
-          {% if file.thermo_file %}
-          <a href="{{ file.thermo_file.url }}">{{ file.thermo_file }}</a>
+          {% if mech.ck_thermo_file %}
+          <a href="{{ mech.ck_thermo_file.url }}">{{ mech.ck_thermo_file }}</a>
           <button type="button" class="btn btn-primary btn-sm">Edit</button> 
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
         </td>
         <td>
-          {% if file.transport_file %}
-          <a href="{{ file.transport_file.url }}">{{ file.transport_file }}</a>
+          {% if mech.ck_transport_file %}
+          <a href="{{ mech.ck_transport_file.url }}">{{ mech.ck_transport_file }}</a>
           <button type="button" class="btn btn-primary btn-sm">Edit</button> 
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
         </td>
         <td>
-          {% if file.surface_file %}
-          <a href="{{ file.surface_file.url }}">{{ file.surface_file }}</a>
+          {% if mech.ck_surface_file %}
+          <a href="{{ mech.ck_surface_file.url }}">{{ mech.ck_surface_file }}</a>
           <button type="button" class="btn btn-primary btn-sm">Edit</button> 
           {% else %}
             <span class="text-muted">No File Attached</span>
