@@ -4,7 +4,7 @@ A tool to check chemistry, in the form of chemkin and cantera files.
 
 Initial setup, installing dependencies (or use the Pipfile):
 
-    $ conda install django sqlparse
+    $ conda install django sqlparse ruamel_yaml
 
 First run or every time someone changes your Models:
 

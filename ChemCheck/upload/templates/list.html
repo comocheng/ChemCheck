@@ -5,6 +5,7 @@
 <table class="table table-striped">
   <thead>
     <tr>
+      <th>Action</th> 
         <th>Mechanism</th>
         <th>Thermo</th>
         <th>Transport</th>
@@ -12,36 +13,38 @@
     </tr>
   </thead>
   <tbody>
-    {% for file in uploaded_files %}
+    {% for mech in mechanisms %}
       <tr>
+          <td>
+            <a href="/mechanism/{{ mech.id }}">
+              <button type="button" class="btn btn-primary btn-sm">Details</button>
+            </a>
+          </td>
         <td>
-          {% if file.mechanism_file %}
-            <a href="{{ file.mechanism_file.url }}">{{ file.mechanism_file }}</a>
-            <button type="button" class="btn btn-primary btn-sm">Edit</button>
+          {% if mech.ck_mechanism_file %}
+            <a href="{{ mech.ck_mechanism_file.url }}">{{ mech.ck_mechanism_file }}</a>
+            
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %} 
         </td>
         <td>
-          {% if file.thermo_file %}
-          <a href="{{ file.thermo_file.url }}">{{ file.thermo_file }}</a>
-          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% if mech.ck_thermo_file %}
+          <a href="{{ mech.ck_thermo_file.url }}">{{ mech.ck_thermo_file }}</a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
         </td>
         <td>
-          {% if file.transport_file %}
-          <a href="{{ file.transport_file.url }}">{{ file.transport_file }}</a>
-          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% if mech.ck_transport_file %}
+          <a href="{{ mech.ck_transport_file.url }}">{{ mech.ck_transport_file }}</a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
         </td>
         <td>
-          {% if file.surface_file %}
-          <a href="{{ file.surface_file.url }}">{{ file.surface_file }}</a>
-          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% if mech.ck_surface_file %}
+          <a href="{{ mech.ck_surface_file.url }}">{{ mech.ck_surface_file }}</a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
@@ -51,5 +54,11 @@
 
   </tbody>   
 </table>
+
+
+<a href="/upload/">
+  <button type="button" class="btn btn-primary btn-sm">Upload new mechanism</button>
+</a>
+
 
 {% endblock %}

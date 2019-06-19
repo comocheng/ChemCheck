@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Mechanism {{ object.id }} details</h1>
+
+<ul>
+        <li>
+          {% if object.ck_mechanism_file %}
+            <a href="{{ object.ck_mechanism_file.url }}">{{ object.ck_mechanism_file }}</a>
+            <button type="button" class="btn btn-primary btn-sm">Edit</button>
+          {% else %}
+            <span class="text-muted">No Mechanism File Attached</span>
+          {% endif %} 
+        </li>
+        <li>
+          {% if object.ck_thermo_file %}
+          <a href="{{ object.ck_thermo_file.url }}">{{ object.ck_thermo_file }}</a>
+          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% else %}
+            <span class="text-muted">No Thermo File Attached</span>
+          {% endif %}  
+        </li>
+        <li>
+          {% if object.ck_transport_file %}
+          <a href="{{ object.ck_transport_file.url }}">{{ object.ck_transport_file }}</a>
+          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% else %}
+            <span class="text-muted">No Transport File Attached</span>
+          {% endif %}  
+        </li>
+        <li>
+          {% if object.ck_surface_file %}
+          <a href="{{ object.ck_surface_file.url }}">{{ object.ck_surface_file }}</a>
+          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          {% else %}
+          <span class="text-muted">No Surface File Attached</span>
+        {% endif %}  
+          </li>
+        </ul>
+
+<a href="/ck2yaml/{{ object.id }}">
+  <button type="button" class="btn btn-primary btn-sm">Convert to YAML</button>
+</a>
+
+<p><a href="/list/">Back to mechanism list</a></p>
+
+{% endblock %}
