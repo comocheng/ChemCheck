@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, DetailView
 from .forms import ChemkinUpload
 from .models import Mechanism
 from django.http import HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
+import os
 
 # Create your views here.
 
@@ -21,6 +22,39 @@ def upload(request):
         form = ChemkinUpload()
     return render(request, 'upload.html', {
         'form': form
+    })
+
+def ck2yaml(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+
+    conversion_log = "Success!!! (just kidding)"
+
+    from .ck2yaml import Parser
+    parser = Parser()
+    input_file = mechanism.ck_mechanism_file.path
+    thermo_file =  mechanism.ck_thermo_file.path if mechanism.ck_thermo_file else None
+    transport_file = mechanism.ck_transport_file.path if mechanism.ck_transport_file else None
+    surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
+    phase_name = None # will default to 'gas'
+    out_name = os.path.join(os.path.split(input_file)[0], 'cantera.yaml')
+    mechanism.ct_mechanism_file = out_name
+    mechanism.save()
+
+    parser.convert_mech(input_file, 
+                        thermo_file, 
+                        transport_file,
+                        surface_file,
+                        phase_name,
+                        out_name = out_name,
+                        quiet = False,
+                        permissive = True,
+                        )
+
+    conversion_log += f"\n Saved to {out_name}"
+
+    return render(request, 'ck2yaml.html', {
+       'mech': mechanism,
+       'conversion_log': conversion_log
     })
 
 
