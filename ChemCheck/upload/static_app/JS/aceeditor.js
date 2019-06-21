@@ -1,7 +1,15 @@
 $(document).ready(function(){
-    $("#edit").click(function(){
-      $.get("{{ mech.ck_mechanism_file.url }}");
+    $(".btn btn-primary btn-sm").click(function(e){
+      var contents = e.target.result;
+      displayContents(contents)
+      function displayContents(contents) {
+        var element = document.getElementsByClassName('btn btn-primary btn-sm');
+        element.innerText = contents;
+        initAceEditor()
+      }
+      
     });
+    
 
     function initAceEditor() {
         var editor = ace.edit("aceEditor");
@@ -12,4 +20,4 @@ $(document).ready(function(){
         editor.setValue($("#file-content").text());
         editor.setOptions({
         maxLines: 2000
-        });
+        });}
