@@ -21,5 +21,4 @@ $(document).ready(function(){
         editor.setOptions({
         maxLines: 2000
         });}
-    
    
