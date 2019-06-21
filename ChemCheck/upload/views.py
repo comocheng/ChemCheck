@@ -36,7 +36,7 @@ def ck2yaml(request, pk):
     transport_file = mechanism.ck_transport_file.path if mechanism.ck_transport_file else None
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
     phase_name = None # will default to 'gas'
-    out_name = os.path.join(os.path.split(input_file)[0], 'cantera.yaml')
+    out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
 
 
     try:
@@ -57,10 +57,12 @@ def ck2yaml(request, pk):
         mechanism.ct_mechanism_file = out_name
         mechanism.save()
         conversion_log += f"\n Saved to {out_name}"
+        
+        
 
     return render(request, 'ck2yaml.html', {
        'mech': mechanism,
-       'conversion_log': conversion_log
+       'conversion_log': conversion_log,
     })
 
 

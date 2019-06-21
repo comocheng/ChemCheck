@@ -2,12 +2,20 @@
 
 {% block content %}
 <h1>Mechanism {{ object.id }} details</h1>
+<style>
+  ul.b {
+  list-style-type: square;
+  line-height:200%;
+}
+</style>
 
-<ul>
+<ul class="b">
         <li>
           {% if object.ck_mechanism_file %}
             <a href="{{ object.ck_mechanism_file.url }}">{{ object.ck_mechanism_file }}</a>
-            <button type="button" class="btn btn-primary btn-sm">Edit</button>
+            <a href="/ace/">
+              <button type="button" class="btn btn-primary btn-sm">Edit</button>
+            </a>
           {% else %}
             <span class="text-muted">No Mechanism File Attached</span>
           {% endif %} 
@@ -15,7 +23,9 @@
         <li>
           {% if object.ck_thermo_file %}
           <a href="{{ object.ck_thermo_file.url }}">{{ object.ck_thermo_file }}</a>
-          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          <a href="/ace/">
+            <button type="button" class="btn btn-primary btn-sm">Edit</button>
+          </a>
           {% else %}
             <span class="text-muted">No Thermo File Attached</span>
           {% endif %}  
@@ -23,7 +33,9 @@
         <li>
           {% if object.ck_transport_file %}
           <a href="{{ object.ck_transport_file.url }}">{{ object.ck_transport_file }}</a>
-          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          <a href="/ace/">
+            <button type="button" class="btn btn-primary btn-sm">Edit</button>
+          </a>
           {% else %}
             <span class="text-muted">No Transport File Attached</span>
           {% endif %}  
@@ -31,7 +43,9 @@
         <li>
           {% if object.ck_surface_file %}
           <a href="{{ object.ck_surface_file.url }}">{{ object.ck_surface_file }}</a>
-          <button type="button" class="btn btn-primary btn-sm">Edit</button> 
+          <a href="/ace/">
+            <button type="button" class="btn btn-primary btn-sm">Edit</button>
+          </a> 
           {% else %}
           <span class="text-muted">No Surface File Attached</span>
         {% endif %}  
