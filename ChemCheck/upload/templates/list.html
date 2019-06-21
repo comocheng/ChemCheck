@@ -5,6 +5,7 @@
 <table class="table table-striped">
   <thead>
     <tr>
+      <th>ID</th>
       <th>Action</th> 
         <th>Mechanism</th>
         <th>Thermo</th>
@@ -15,6 +16,7 @@
   <tbody>
     {% for mech in mechanisms %}
       <tr>
+        <td>{{ mech.id }}</td>
           <td>
             <a href="/mechanism/{{ mech.id }}">
               <button type="button" class="btn btn-primary btn-sm">Details</button>
@@ -22,8 +24,7 @@
           </td>
         <td>
           {% if mech.ck_mechanism_file %}
-            <a href="{{ mech.ck_mechanism_file.url }}">{{ mech.ck_mechanism_file }}</a>
-            
+            <a href="{{ mech.ck_mechanism_file.url }}">{{ mech.ck_mechanism_file.name }}</a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %} 
