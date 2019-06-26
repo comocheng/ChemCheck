@@ -6,7 +6,6 @@
 
 """
 ck2yaml.py: Convert Chemkin-format mechanisms to Cantera YAML input files
-
 Usage:
     ck2yaml [--input=<filename>]
             [--thermo=<filename>]
@@ -16,26 +15,19 @@ Usage:
             [--output=<filename>]
             [--permissive]
             [-d | --debug]
-
 Example:
     ck2yaml --input=chem.inp --thermo=therm.dat --transport=tran.dat
-
 If the output file name is not given, an output file with the same name as the
 input file, with the extension changed to '.yaml'.
-
 An input file containing only species definitions (which can be referenced from
 phase definitions in other input files) can be created by specifying only a
 thermo file.
-
 For the case of a surface mechanism, the gas phase input file should be
 specified as 'input' and the surface phase input file should be specified as
 'surface'.
-
 The '--permissive' option allows certain recoverable parsing errors (e.g.
 duplicate transport data) to be ignored.
 """
-
-from __future__ import print_function
 
 from collections import defaultdict, OrderedDict
 import logging
@@ -52,15 +44,6 @@ try:
     import ruamel_yaml as yaml
 except ImportError:
     from ruamel import yaml
-
-# Improved float formatting requires Numpy >= 1.14
-try:
-    from numpy import format_float_positional, format_float_scientific
-except ImportError:
-    def format_float_positional(value, trim):
-        return '{:.16g}'.format(value)
-    def format_float_scientific(value, trim):
-        return '{:.16g}'.format(value)
 
 BlockMap = yaml.comments.CommentedMap
 
@@ -211,7 +194,6 @@ class Nasa9:
     Thermodynamic data parameterized as any number of nine-coefficient NASA
     polynomials.
     See https://cantera.org/science/science-species.html#the-nasa-9-coefficient-polynomial-parameterization
-
     :param data:
         List of polynomials, where each polynomial is written as
         ```
@@ -323,7 +305,7 @@ class KineticsModel:
     """
     A base class for kinetics models
     """
-    pressure_dependent = None # overloaded in derived classes
+    pressure_dependent = None  # overloaded in derived classes
 
     def __init__(self):
         self.efficiencies = {}
@@ -337,7 +319,7 @@ class KineticsModel:
 
     def reduce(self, output):
         """
-        Assign data from this object to the YAML mapping `output`
+        Assign data from this object to the YAML mapping ``output``
         """
         raise InputError('reduce is not implemented for objects of class {}',
                          self.__class__.__name__)
@@ -346,7 +328,6 @@ class KineticsModel:
 class Arrhenius:
     """
     Represent a modified Arrhenius rate.
-
     :param A:
         The pre-exponential factor, given as a tuple consisting of a floating
         point value and a units string
@@ -383,7 +364,6 @@ class ElementaryRate(KineticsModel):
     """
     A reaction rate described by a single Arrhenius expression.
     See https://cantera.org/science/reactions.html#reactions-with-a-pressure-independent-rate
-
     :param rate:
         The Arrhenius expression describing this reaction rate.
     """
@@ -402,7 +382,6 @@ class SurfaceRate(KineticsModel):
     """
     An Arrhenius-like reaction occurring on a surface
     See https://cantera.org/science/reactions.html#surface-reactions
-
     :param rate:
         The Arrhenius expression describing this reaction rate.
     :param coverages:
@@ -450,7 +429,6 @@ class PDepArrhenius(KineticsModel):
     A rate calculated by interpolating between Arrhenius expressions at
     various pressures.
     See https://cantera.org/science/reactions.html#pressure-dependent-arrhenius-rate-expressions-p-log
-
     :param pressures:
         A list of pressures at which Arrhenius expressions are given.
     :param pressure_units:
@@ -479,7 +457,6 @@ class Chebyshev(KineticsModel):
     """
     A rate calculated in terms of a bivariate Chebyshev polynomial.
     See https://cantera.org/science/reactions.html#chebyshev-reaction-rate-expressions
-
     :param coeffs:
         Matrix of Chebyshev coefficients, dimension N_T by N_P
     :param Tmin:
@@ -524,7 +501,6 @@ class ThreeBody(KineticsModel):
     """
     A rate calculated for a reaction which includes a third-body collider.
     See https://cantera.org/science/reactions.html#three-body-reactions
-
     :param high_rate:
         The Arrhenius kinetics (high-pressure limit)
     :param efficiencies:
@@ -553,7 +529,6 @@ class Falloff(ThreeBody):
     """
     A rate for a pressure-dependent falloff reaction.
     See https://cantera.org/science/reactions.html#falloff-reactions
-
     :param low_rate:
         The Arrhenius kinetics at the low-pressure limit
     :param high_rate:
@@ -587,7 +562,6 @@ class ChemicallyActivated(ThreeBody):
     """
     A rate for a chemically-activated reaction.
     See https://cantera.org/science/reactions.html#chemically-activated-reactions
-
     :param low_rate:
         The Arrhenius kinetics at the low-pressure limit
     :param high_rate:
@@ -703,10 +677,7 @@ def fortFloat(s):
     Convert a string representation of a floating point value to a float,
     allowing for some of the peculiarities of allowable Fortran representations.
     """
-    s = s.strip()
-    s = s.replace('D', 'E').replace('d', 'e')
-    s = s.replace('E ', 'E+').replace('e ', 'e+')
-    return float(s)
+    return float(s.strip().lower().replace('d', 'e').replace('e ', 'e+'))
 
 
 def get_index(seq, value):
@@ -765,7 +736,8 @@ class Parser:
         else:
             logging.warning(message)
 
-    def parse_composition(self, elements, nElements, width):
+    @staticmethod
+    def parse_composition(elements, nElements, width):
         """
         Parse the elemental composition from a 7 or 9 coefficient NASA polynomial
         entry.
@@ -777,6 +749,8 @@ class Parser:
             if not symbol:
                 continue
             try:
+                # Convert to float first for cases where ``count`` is a string
+                # like "2.00".
                 count = int(float(count))
                 if count:
                     composition[symbol.capitalize()] = count
@@ -784,7 +758,8 @@ class Parser:
                 pass
         return composition
 
-    def get_rate_constant_units(self, length_dims, length_units, quantity_dims,
+    @staticmethod
+    def get_rate_constant_units(length_dims, length_units, quantity_dims,
                                 quantity_units, time_dims=1, time_units='s'):
 
         units = ''
@@ -818,9 +793,10 @@ class Parser:
         """
         Read a thermodynamics entry for one species in a Chemkin-format file
         (consisting of two 7-coefficient NASA polynomials). Returns the label of
-        the species, the thermodynamics model as a :class:`Nasa9` object, the
-        elemental composition of the species, and the comment/note associated with
-        the thermo entry.
+        the species, the thermodynamics model as a :class:`Nasa7` object, and
+        the elemental composition of the species.
+        For more details on this format, see `Debugging common errors in CK files
+        <https://cantera.org/tutorials/ck2cti-tutorial.html#debugging-common-errors-in-ck-files>`__.
         """
         identifier = lines[0][0:24].split()
         species = identifier[0].strip()
@@ -832,7 +808,7 @@ class Parser:
 
         comments = '\n'.join(c.rstrip() for c in comments if c.strip())
         if comments and note:
-            note = '\n'.join(note, comments)
+            note = '\n'.join((note, comments))
         elif comments:
             note = comments
 
@@ -897,12 +873,11 @@ class Parser:
 
     def read_NASA9_entry(self, entry, comments):
         """
-        Read a thermodynamics `entry` for one species given as one or more
+        Read a thermodynamics ``entry`` for one species given as one or more
         9-coefficient NASA polynomials, written in the format described in
         Appendix A of NASA Reference Publication 1311 (McBride and Gordon, 1996).
         Returns the label of the species, the thermodynamics model as a
-        :class:`Nasa9` object, the elemental composition of the species, and
-        the comment/note associated with the thermo entry.
+        :class:`Nasa9` object, and the elemental composition of the species
         """
         tokens = entry[0].split()
         species = tokens[0]
@@ -916,7 +891,7 @@ class Parser:
 
         comments = '\n'.join(c.rstrip() for c in comments if c.strip())
         if comments and note:
-            note = '\n'.join(note, comments)
+            note = '\n'.join((note, comments))
         elif comments:
             note = comments
 
@@ -953,12 +928,13 @@ class Parser:
                              '(+M)': 'falloff3b', '(+m)': 'falloff3b',
                              '<=>': 'equal', '=>': 'equal', '=': 'equal',
                              'HV': 'photon', 'hv': 'photon'}
-        self.other_tokens.update(('(+%s)' % k, 'falloff3b: %s' % k) for k in self.species_dict)
+        self.other_tokens.update(('(+{})'.format(k), 'falloff3b: {}'.format(k))
+                                 for k in self.species_dict)
         self.Slen = max(map(len, self.other_tokens))
 
     def read_kinetics_entry(self, entry, surface):
         """
-        Read a kinetics `entry` for a single reaction as loaded from a
+        Read a kinetics ``entry`` for a single reaction as loaded from a
         Chemkin-format file. Returns a :class:`Reaction` object with the
         reaction and its associated kinetics.
         """
@@ -968,7 +944,7 @@ class Parser:
         quantity_units = self.quantity_units
         if 'units' in entry.lower():
             for units in sorted(QUANTITY_UNITS, key=lambda k: -len(k)):
-                pattern = re.compile(r'units *\/ *%s *\/' % re.escape(units),
+                pattern = re.compile(r'units *\/ *{} *\/'.format(re.escape(units)),
                                      flags=re.IGNORECASE)
                 m = pattern.search(entry)
                 if m:
@@ -977,7 +953,7 @@ class Parser:
                     break
 
             for units in sorted(ENERGY_UNITS, key=lambda k: -len(k)):
-                pattern = re.compile(r'units *\/ *%s *\/' % re.escape(units),
+                pattern = re.compile(r'units *\/ *{} *\/'.format(re.escape(units)),
                                      re.IGNORECASE)
                 m = pattern.search(entry)
                 if m:
@@ -993,7 +969,7 @@ class Parser:
         b = float(tokens[-2])
         Ea = float(tokens[-1])
         reaction = ''.join(tokens[:-3]) + '\n'
-        original_reaction = reaction # for use in error messages
+        original_reaction = reaction  # for use in error messages
 
         # Identify tokens in the reaction expression in order of
         # decreasing length
@@ -1043,7 +1019,7 @@ class Parser:
                 products.append((stoichiometry, token, kind))
                 stoichiometry = 1
 
-        if lhs is True:
+        if lhs:
             raise InputError("Failed to find reactant/product delimiter in reaction string.")
 
         # Create a new Reaction object for this reaction
@@ -1118,7 +1094,7 @@ class Parser:
         revReaction = None
         is_sticking = None
         motz_wise = None
-        Tmin = Tmax = Pmin = Pmax = None # Chebyshev parameters
+        Tmin = Tmax = Pmin = Pmax = None  # Chebyshev parameters
         degreeT = degreeP = None
 
         # Note that the subsequent lines could be in any order
@@ -1276,8 +1252,14 @@ class Parser:
             if not parsed:
                 raise InputError('Unparsable line:\n"""\n{}\n"""', line)
 
-        # Decide which kinetics to keep and store them on the reaction object
-        # Only one of these should be true at a time!
+        # Decide which kinetics to keep and store them on the reaction object.
+        # At most one of the special cases should be true
+        tests = [cheb_coeffs, pdep_arrhenius, low_rate, high_rate, third_body,
+                 surface]
+        if sum(bool(t) for t in tests) > 1:
+            raise InputError('Reaction entry contains parameters for more than '
+                'one reaction type.')
+
         if cheb_coeffs:
             if Tmin is None or Tmax is None:
                 raise InputError('Missing TCHEB line for reaction {}', reaction)
@@ -1332,7 +1314,7 @@ class Parser:
 
     def load_chemkin_file(self, path, skip_undeclared_species=True, surface=False):
         """
-        Load a Chemkin-format input file to `path` on disk.
+        Load a Chemkin-format input file from ``path`` on disk.
         """
         transportLines = []
         self.line_number = 0
@@ -1734,10 +1716,8 @@ class Parser:
 
         self.check_duplicate_reactions()
 
-        index = 0
-        for reaction in self.reactions:
-            index += 1
-            reaction.index = index
+        for index, reaction in enumerate(self.reactions):
+            reaction.index = index + 1
 
         if transportLines:
             self.parse_transport_data(transportLines, path, transport_start_line)
@@ -1746,7 +1726,6 @@ class Parser:
         """
         Check for marked (and unmarked!) duplicate reactions. Raise exception
         for unmarked duplicate reactions.
-
         Pressure-independent and pressure-dependent reactions are treated as
         different, so they don't need to be marked as duplicate.
         """
@@ -1853,16 +1832,16 @@ class Parser:
                 metadata.yaml_set_comment_before_after_key('generator', before='\n')
             emitter.dump(metadata, dest)
 
+            units = FlowMap([('length', 'cm'), ('time', 's')])
+            units['quantity'] = self.output_quantity_units
+            units['activation-energy'] = self.output_energy_units
+            unitsMap = BlockMap([('units', units)])
+            unitsMap.yaml_set_comment_before_after_key('units', before='\n')
+            emitter.dump(unitsMap, dest)
+
             phases = []
             reactions = []
             if name is not None:
-                units = FlowMap([('length', 'cm'), ('time', 's')])
-                units['quantity'] = self.output_quantity_units
-                units['activation-energy'] = self.output_energy_units
-                unitsMap = BlockMap([('units', units)])
-                unitsMap.yaml_set_comment_before_after_key('units', before='\n')
-                emitter.dump(unitsMap, dest)
-
                 phase = BlockMap()
                 phase['name'] = name
                 phase['thermo'] = 'ideal-gas'
@@ -1902,9 +1881,10 @@ class Parser:
                 phase['state'] = FlowMap([('T', 300.0), ('P', '1 atm')])
                 phases.append(phase)
 
-            phasesMap = BlockMap([('phases', phases)])
-            phasesMap.yaml_set_comment_before_after_key('phases', before='\n')
-            emitter.dump(phasesMap, dest)
+            if phases:
+                phasesMap = BlockMap([('phases', phases)])
+                phasesMap.yaml_set_comment_before_after_key('phases', before='\n')
+                emitter.dump(phasesMap, dest)
 
             # Write data on custom elements
             if self.element_weights:
@@ -1930,6 +1910,8 @@ class Parser:
                 reactionsMap.yaml_set_comment_before_after_key(label, before='\n')
                 emitter.dump(reactionsMap, dest)
 
+        # Names of surface phases need to be returned so they can be imported as
+        # part of mechanism validation
         return surface_names
 
     @staticmethod
@@ -1938,21 +1920,6 @@ class Parser:
                      quiet=False, permissive=None):
 
         parser = Parser()
-        if input_file:
-            parser.files.append(input_file)
-            input_file = os.path.expanduser(input_file)
-        if thermo_file:
-            parser.files.append(thermo_file)
-            thermo_file = os.path.expanduser(thermo_file)
-        if transport_file:
-            parser.files.append(transport_file)
-            transport_file = os.path.expanduser(transport_file)
-        if surface_file:
-            parser.files.append(surface_file)
-            surface_file = os.path.expanduser(surface_file)
-        if out_name:
-            out_name = os.path.expanduser(out_name)
-
         if quiet:
             logging.basicConfig(level=logging.ERROR)
         else:
@@ -1962,6 +1929,8 @@ class Parser:
             parser.warning_as_error = not permissive
 
         if input_file:
+            parser.files.append(input_file)
+            input_file = os.path.expanduser(input_file)
             if not os.path.exists(input_file):
                 raise IOError('Missing input file: {0!r}'.format(input_file))
             try:
@@ -1974,18 +1943,9 @@ class Parser:
         else:
             phase_name = None
 
-        if surface_file:
-            if not os.path.exists(surface_file):
-                raise IOError('Missing input file: {0!r}'.format(surface_file))
-            try:
-                # Read input mechanism files
-                parser.load_chemkin_file(surface_file, surface=True)
-            except Exception as err:
-                logging.warning("\nERROR: Unable to parse '{0}' near line {1}:\n{2}\n".format(
-                                surface_file, parser.line_number, err))
-                raise
-
         if thermo_file:
+            parser.files.append(thermo_file)
+            thermo_file = os.path.expanduser(thermo_file)
             if not os.path.exists(thermo_file):
                 raise IOError('Missing thermo file: {0!r}'.format(thermo_file))
             try:
@@ -1997,6 +1957,8 @@ class Parser:
                 raise
 
         if transport_file:
+            parser.files.append(transport_file)
+            transport_file = os.path.expanduser(transport_file)
             if not os.path.exists(transport_file):
                 raise IOError('Missing transport file: {0!r}'.format(transport_file))
             with open(transport_file, 'r', errors='ignore') as f:
@@ -2008,7 +1970,22 @@ class Parser:
                 if s.transport is None:
                     raise InputError("No transport data for species '{}'.", s)
 
-        if not out_name:
+        if surface_file:
+            parser.files.append(surface_file)
+            surface_file = os.path.expanduser(surface_file)
+            if not os.path.exists(surface_file):
+                raise IOError('Missing input file: {0!r}'.format(surface_file))
+            try:
+                # Read input mechanism files
+                parser.load_chemkin_file(surface_file, surface=True)
+            except Exception as err:
+                logging.warning("\nERROR: Unable to parse '{0}' near line {1}:\n{2}\n".format(
+                                surface_file, parser.line_number, err))
+                raise
+
+        if out_name:
+            out_name = os.path.expanduser(out_name)
+        else:
             out_name = os.path.splitext(input_file)[0] + '.yaml'
 
         # Write output file
@@ -2051,12 +2028,18 @@ def main(argv):
         print(__doc__)
         sys.exit(0)
 
-    if '--input' in options:
-        input_file = options['--input']
-    else:
-        input_file = None
-
+    input_file = options.get('--input')
     thermo_file = options.get('--thermo')
+    permissive = '--permissive' in options
+    quiet = '--quiet' in options
+    transport_file = options.get('--transport')
+    surface_file = options.get('--surface')
+    phase_name = options.get('--id', 'gas')
+
+    if not input_file and not thermo_file:
+        print('At least one of the arguments "--input=..." or "--thermo=..."'
+              ' must be provided.\nRun "ck2yaml.py --help" to see usage help.')
+        sys.exit(1)
 
     if '--output' in options:
         out_name = options['--output']
@@ -2067,19 +2050,13 @@ def main(argv):
     else:
         out_name = os.path.splitext(thermo_file)[0] + '.yaml'
 
-    permissive = '--permissive' in options
-    quiet = '--quiet' in options
-    transport_file = options.get('--transport')
-    surface_file = options.get('--surface')
-    phase_name = options.get('--id', 'gas')
-
     surfaces = Parser.convert_mech(input_file, thermo_file, transport_file,
                                    surface_file, phase_name, out_name,
                                    quiet, permissive)
 
     # Do full validation by importing the resulting mechanism
     if not input_file:
-        # Can't validate input file that don't define a phase
+        # Can't validate input files that don't define a phase
         return
 
     if '--no-validate' in options:
