@@ -1,13 +1,13 @@
 from django import forms
-from .models import Chemkin
+from .models import Mechanism
 
 
-class Chemkinupload(forms.ModelForm):
+class ChemkinUpload(forms.ModelForm):
     class Meta:
-        model = Chemkin
-        fields = ('mechanism_file',
-                  'thermo_file',
-                  'transport_file',
-                  'surface_file')
+        model = Mechanism
+        fields = ('ck_mechanism_file',
+                  'ck_thermo_file',
+                  'ck_transport_file',
+                  'ck_surface_file',)
 
 

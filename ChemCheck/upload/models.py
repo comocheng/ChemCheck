@@ -7,14 +7,21 @@ import datetime
 def upload_to(instance, filename):
     return 'uploads/{id}/{fn}'.format(id=instance.pk,fn=filename)
 
-class Chemkin(models.Model):
+class Mechanism(models.Model):
     """
-    A Chemkin mechanism
+    A chemical kinetic mechanism, from Chemkin or Cantera
     """
-    mechanism_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True)
-    thermo_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True)
-    transport_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True)
-    surface_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True)
+    ck_mechanism_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
+                                       verbose_name="Chemkin mechanism file")
+    ck_thermo_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
+                                       verbose_name="Chemkin thermo file")
+    ck_transport_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
+                                       verbose_name="Chemkin transport file")
+    ck_surface_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
+                                       verbose_name="Chemkin surface file")
+    ct_mechanism_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
+                                        verbose_name='Cantera yaml file')
+    ct_conversion_errors = models.TextField(verbose_name='Errors from the ck2yaml conversion')
     timestamps = models.DateTimeField(auto_now_add=True)
 
     def get_absolute_url(self):
@@ -24,9 +31,9 @@ class Chemkin(models.Model):
     def save(self, *args, **kwargs):
         """ 
         The folder used to upload the files to, depends on the id (primary key)
-        of the Chemkin object. If that is newly created and not yet saved, it 
-        doesn't have an id yet. So to save the Chemkin object and all its files,
-        you need to save the Chemkin object first with no files if it has no id,
+        of the Mechanism object. If that is newly created and not yet saved, it 
+        doesn't have an id yet. So to save the Mechanism object and all its files,
+        you need to save the Mechanism object first with no files if it has no id,
         before then saving it again with the files re-attached.
 
         This solution is based on john.don83 answer here
