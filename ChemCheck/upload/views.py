@@ -90,8 +90,9 @@ class MechanismObjectMixin(object):
         pk = self.kwargs.get('pk')
         obj = None
         if pk is not None:
-            obj=get_object_or_404(self.model, pk=pk)
+            obj = get_object_or_404(self.model, pk=pk)
         return obj
+
 class MechanismDeleteView(MechanismObjectMixin, View):
     template_name="file_delete_mechanism.html"
     def get(self, request, id=id, *args, **kwargs):
@@ -180,19 +181,11 @@ class MechanismUpdateView(MechanismObjectMixin, View):
     def post(self, request, *args, **kwargs):
         context = {}
         obj = self.get_object()
-        if obj is not None:
-            form = ChemkinUpload(request.POST, request.FILES, instance=obj)
-            if form.is_valid():
-                form.save()
-                url = reverse_lazy('mechanism-detail', args=[obj.pk])
-                return HttpResponseRedirect(url)
-        else:
-           if request.method == 'POST':
-               form = ChemkinUpload(request.POST, request.FILES)
-               if form.is_valid:
-                   form.save()
-                   context['form'] = form
-                   context['object'] = obj
-                   return HttpResponseRedirect('/list/')
-        return render(request, self.template_name, context)
+
+        form = ChemkinUpload(request.POST, request.FILES, instance=obj)
+        if form.is_valid():
+            form.save()
+            url = reverse_lazy('mechanism-detail', args=[obj.pk])
+            return HttpResponseRedirect(url)
+    
 
