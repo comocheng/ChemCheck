@@ -184,9 +184,8 @@ class MechanismUpdateView(MechanismObjectMixin, View):
             form = ChemkinUpload(request.POST, request.FILES, instance=obj)
             if form.is_valid():
                 form.save()
-                context['object'] = obj
-                context['form'] = form
-                return HttpResponseRedirect('/list/')
+                url = reverse_lazy('mechanism-detail', args=[obj.pk])
+                return HttpResponseRedirect(url)
         else:
            if request.method == 'POST':
                form = ChemkinUpload(request.POST, request.FILES)
