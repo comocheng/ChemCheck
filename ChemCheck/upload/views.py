@@ -165,39 +165,35 @@ class MechanismsurfaceDeleteView(MechanismObjectMixin, View):
 
 
 class MechanismUpdateView(MechanismObjectMixin, View):
-    template_name="file_update_mechanism.html"
+    template_name="file_update.html"
     def get(self, request, id=id, *args, **kwargs):
         context = {}
         obj = self.get_object()
         if obj is not None:
+            form = ChemkinUpload(instance=obj)
             context['object'] = obj
+            context['form'] = form
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         context = {}
-        obj = self.get_object().ck_mechanism_file
-        if obj is None:
-            if request.method == 'POST':
-                form = ChemkinUpload(request.POST, request.FILES)
-                if form.is_valid:
-                    form.save()
-                    return HttpResponseRedirect('/list/')
-            else:
-                pass
-                
+        obj = self.get_object()
+        if obj is not None:
+            form = ChemkinUpload(request.POST, request.FILES, instance=obj)
+            if form.is_valid():
+                form.save()
+                context['object'] = obj
+                context['form'] = form
+                return HttpResponseRedirect('/list/')
         else:
-            obj.delete()
-            context['object'] = None
-            return HttpResponseRedirect('/list/')
+           if request.method == 'POST':
+               form = ChemkinUpload(request.POST, request.FILES)
+               if form.is_valid:
+                   form.save()
+                   context['form'] = form
+                   context['object'] = obj
+                   return HttpResponseRedirect('/list/')
         return render(request, self.template_name, context)
 
 
-# def replace_file(request, pk):
-#     mechanism = get_object_or_404(Mechanism, pk=pk)
-#     transport_file_path = mechanism.ck_transport_file.path if mechanism.ck_transport_file else None
-#     if request == 'POST':
-#         upload_file = request.FILES['document']
-#         mechanism.ck_transport_file.save(os.base.name(transport_file_path), File(open(upload_file, "wb")), save=True)
-#         os.remove(transport_file_path)
-    
-    
+
