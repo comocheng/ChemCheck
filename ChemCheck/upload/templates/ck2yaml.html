@@ -4,15 +4,20 @@
 <h1>Mechanism {{ mech.id }} conversion to yaml</h1>
 
 {{ conversion_log }}
+
+{% if mech.ct_mechanism_file %}
 <br>
+Cantera YAML file: 
 <a href="/media/uploads/{{ mech.id }}/cantera.txt">
-    <button type="button" class="btn btn-primary btn-sm">See Details</button>
+    <button type="button" class="btn btn-primary btn-sm">View</button>
 </a>
 {% load static %}
 <a href="/media/uploads/{{ mech.id }}/cantera.txt" download>
     <link rel="stylesheet" href="{% static 'CSS/downloadbutton.css' %}" type="text/css">
     <button class="btn"> Download</button>
 </a>
+{% endif %}
+
 </br>
 <p><a href="/mechanism/{{ mech.id }} ">Back to mechanism details</a></p>
 
