@@ -33,6 +33,8 @@ def ck2yaml(request, pk):
     conversion_log = "Going to try this..."
 
     from .ck2yaml import Parser
+    import traceback
+
     parser = Parser()
     input_file = mechanism.ck_mechanism_file.path
     thermo_file =  mechanism.ck_thermo_file.path if mechanism.ck_thermo_file else None
@@ -53,16 +55,16 @@ def ck2yaml(request, pk):
                         permissive = True,
                         )
     except Exception as e:
-        conversion_log += str(e)
-        mechanism.ct_conversion_errors = str(e)
+        error_message = traceback.format_exc()
+        conversion_log += error_message
+        mechanism.ct_conversion_errors = error_message
+        mechanism.ct_mechanism_file = None
         mechanism.save()
     else:
         mechanism.ct_mechanism_file = out_name
         mechanism.save()
-        conversion_log += f"\n Saved to {out_name}"
+        conversion_log += f"\nConversion successful!\nCantera yaml file saved to {out_name}"
         
-        
-
     return render(request, 'ck2yaml.html', {
        'mech': mechanism,
        'conversion_log': conversion_log,
