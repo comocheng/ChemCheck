@@ -16,6 +16,9 @@
             <a href="/ace/">
               <button type="button" class="btn btn-primary btn-sm">Edit</button>
             </a>
+            <a href="delete_mechanism">
+              <button type="button" class="btn btn-danger btn-sm">Delete</button>
+            </a>
           {% else %}
             <span class="text-muted">No Mechanism File Attached</span>
           {% endif %} 
@@ -25,6 +28,9 @@
           <a href="{{ object.ck_thermo_file.url }}">{{ object.ck_thermo_file }}</a>
           <a href="/ace/">
             <button type="button" class="btn btn-primary btn-sm">Edit</button>
+          </a>
+          <a href="delete_thermo">
+            <button type="button" class="btn btn-danger btn-sm">Delete</button>
           </a>
           {% else %}
             <span class="text-muted">No Thermo File Attached</span>
@@ -36,6 +42,9 @@
           <a href="/ace/">
             <button type="button" class="btn btn-primary btn-sm">Edit</button>
           </a>
+          <a href="delete_transport">
+            <button type="button" class="btn btn-danger btn-sm">Delete</button>
+          </a>
           {% else %}
             <span class="text-muted">No Transport File Attached</span>
           {% endif %}  
@@ -45,7 +54,10 @@
           <a href="{{ object.ck_surface_file.url }}">{{ object.ck_surface_file }}</a>
           <a href="/ace/">
             <button type="button" class="btn btn-primary btn-sm">Edit</button>
-          </a> 
+          </a>
+          <a href="delete_surface">
+            <button type="button" class="btn btn-danger btn-sm">Delete</button>
+          </a>
           {% else %}
           <span class="text-muted">No Surface File Attached</span>
         {% endif %}  
@@ -54,6 +66,9 @@
 
 <a href="/ck2yaml/{{ object.id }}">
   <button type="button" class="btn btn-primary btn-sm">Convert to YAML</button>
+</a>
+<a href="update">
+  <button type="button" class="btn btn-primary btn-sm">Update</button>
 </a>
 
 <p><a href="/list/">Back to mechanism list</a></p>
