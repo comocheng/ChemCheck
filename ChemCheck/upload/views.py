@@ -34,6 +34,7 @@ def ck2yaml(request, pk):
 
     from .ck2yaml import Parser
     import traceback
+    import logging
 
     parser = Parser()
     input_file = mechanism.ck_mechanism_file.path
@@ -55,6 +56,7 @@ def ck2yaml(request, pk):
                         permissive = True,
                         )
     except Exception as e:
+        conversion_log += str(e)                      
         error_message = traceback.format_exc()
         conversion_log += error_message
         mechanism.ct_conversion_errors = error_message
@@ -74,8 +76,11 @@ def ck2yaml(request, pk):
 class MechanismDetailView(DetailView):
     model = Mechanism
     
-def ace(request):
-    return render(request, 'ace.html', {})
+def ace(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    f = mechanism.ck_mechanism_file.path
+    content = open(f, "r").read()
+    return render(request, 'ace.html', {'content': content})
 
 def mechanisms_list(request):
     mechanisms = Mechanism.objects.all()
@@ -83,9 +88,6 @@ def mechanisms_list(request):
        'mechanisms': mechanisms
     })
     
-class MechanismDetailView(DetailView):
-    model = Mechanism
-
 class MechanismObjectMixin(object):
     model = Mechanism
     def get_object(self):
@@ -181,7 +183,6 @@ class MechanismUpdateView(MechanismObjectMixin, View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        context = {}
         obj = self.get_object()
 
         form = ChemkinUpload(request.POST, request.FILES, instance=obj)
