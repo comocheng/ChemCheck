@@ -1,32 +1,51 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
 {% load static %}
-<html lang="en">
+{% block container_option %}
+{% endblock %}
+{% block card %}
+{% endblock %}
+{% block content %}
 <head>
 <title>ACE in Action</title>
-<style type="text/css" media="screen">
-    #editor { 
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-    }
-</style>
+
+<link rel="stylesheet" href="{% static 'CSS/editor.css' %}" type="text/css" media="screen">
+
+
 </head>
 <body>
-
+        
 <div id="editor">
     {{ content }}
-
+        
 </div>
+<button class="btn btn-danger" id="btn-save">Save Text to File</button>
+<span>
+    <a href="/mechanism/{{ mechanism.id }}">
+        <button class="btn btn-primary" id="btn-back">Back to Detials</button>
+    </a></span>
 <div id="file-content" style="display: none;"></div>
-
+        
 <script src="{% static 'JS/aceeditor.js' %}" type="text/javascript" charset="utf-8"></script>   
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js" type="text/javascript" charset="utf-8"></script>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.slim.js"
+  integrity="sha256-BTlTdQO9/fascB1drekrDVkaKd9PkwBymMlHOiG+qLI="
+  crossorigin="anonymous"></script>
 <script>
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/monokai");
-    editor.session.setMode("ace/mode/javascript");
+var editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");
+editor.session.setMode("ace/mode/python");
+editor.setHighlightActiveLine(false);
+</script>
+
+<script>
+$('#btn-save').click(function(){
+    var text = editor.getValue();
+    var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+    var filename = "output.txt"
+})
+
 </script>
 </body>
 </html>
+{% endblock %}

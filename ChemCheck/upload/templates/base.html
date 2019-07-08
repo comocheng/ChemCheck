@@ -28,8 +28,10 @@
     </div>
   </nav>
   <div class="container">
+    {% block container_option %}
     <div class="row justify-content-center">
       <div class="col-lg-10 col-md-12">
+    {% endblock %}    
         {% block card %}
         <div class="card mb-4">
           <div class="card-body">

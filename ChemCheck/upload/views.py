@@ -66,7 +66,6 @@ def ck2yaml(request, pk):
         mechanism.ct_mechanism_file = out_name
         mechanism.save()
         conversion_log += f"\nConversion successful!\nCantera yaml file saved to {out_name}"
-        
     return render(request, 'ck2yaml.html', {
        'mech': mechanism,
        'conversion_log': conversion_log,
@@ -76,11 +75,38 @@ def ck2yaml(request, pk):
 class MechanismDetailView(DetailView):
     model = Mechanism
     
-def ace(request, pk):
+def ace_mech(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     f = mechanism.ck_mechanism_file.path
     content = open(f, "r").read()
-    return render(request, 'ace.html', {'content': content})
+    return render(request, 'ace.html', {
+        'content': content,
+        'mechanism': mechanism
+        })
+def ace_therm(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    f = mechanism.ck_thermo_file.path
+    content = open(f, "r").read()
+    return render(request, 'ace.html', {
+        'content': content,
+        'mechanism': mechanism
+        })
+def ace_trans(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    f = mechanism.ck_transport_file.path
+    content = open(f, "r").read()
+    return render(request, 'ace.html', {
+        'content': content,
+        'mechanism': mechanism
+        })
+def ace_surf(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    f = mechanism.ck_surface_file.path
+    content = open(f, "r").read()
+    return render(request, 'ace.html', {
+        'content': content,
+        'mechanism': mechanism
+        })
 
 def mechanisms_list(request):
     mechanisms = Mechanism.objects.all()
