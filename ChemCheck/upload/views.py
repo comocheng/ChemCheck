@@ -217,4 +217,3 @@ class MechanismUpdateView(MechanismObjectMixin, View):
             url = reverse_lazy('mechanism-detail', args=[obj.pk])
             return HttpResponseRedirect(url)
     
-
