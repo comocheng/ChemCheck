@@ -1923,10 +1923,12 @@ class Parser:
                      quiet=False, permissive=None):
 
         parser = Parser()
+        f = os.path.split(input_file)[0]
+        p = os.path.join(f, "error.txt")
         if quiet:
             logging.basicConfig(level=logging.ERROR)
         else:
-            logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(filename=p, level=logging.INFO)
 
         if permissive is not None:
             parser.warning_as_error = not permissive
