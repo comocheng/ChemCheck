@@ -6,23 +6,20 @@
 {% endblock %}
 {% block content %}
 <head>
-<title>ACE in Action</title>
-
+<title>Editing {{ filename }}</title>
 <link rel="stylesheet" href="{% static 'CSS/editor.css' %}" type="text/css" media="screen">
-
-
 </head>
 <body>
-        
+    
+<button class="btn btn-primary" id="btn-download">Download to File</button>
+<a href="/mechanism/{{ mechanism.id }}">
+    <button class="btn btn-primary" id="btn-back">Back to Details</button>
+</a>
+
 <div id="editor">
     {{ content }}
-        
 </div>
-<button class="btn btn-danger" id="btn-save">Save Text to File</button>
-<span>
-    <a href="/mechanism/{{ mechanism.id }}">
-        <button class="btn btn-primary" id="btn-back">Back to Details</button>
-    </a></span>
+
 <div id="file-content" style="display: none;"></div>
         
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -38,7 +35,7 @@ editor.setHighlightActiveLine(false);
 </script>
 
 <script>
-$('#btn-save').click(function(){
+$('#btn-download').click(function(){
     var text = editor.getValue();
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
     var fileName = "{{ filename }}";
@@ -51,7 +48,6 @@ $('#btn-save').click(function(){
     a.click();
     window.URL.revokeObjectURL(url);
 })
-
 </script>
 </body>
 </html>
