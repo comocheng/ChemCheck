@@ -1,18 +1,26 @@
 # ChemCheck
-A tool to check chemistry, in the form of chemkin and cantera files.
 
+A tool to check chemistry, in the form of CHEMKIN and Cantera files.
 
-Initial setup, installing dependencies (or use the Pipfile):
+Initial setup, installing dependencies using conda:
 
-    $ conda install django sqlparse ruamel_yaml
+    $ conda create -n chemcheck -c conda-forge django\>=2.2.2 ruamel.yaml numpy
+    $ conda activate chemcheck
+    $ cd ChemCheck
 
-First run or every time someone changes your Models:
+Initial setup, installing dependencies using `pipenv`:
+
+    $ pipenv install
+    $ pipenv shell
+    $ cd ChemCheck
+
+First run or every time someone changes the models:
 
     $ python3 manage.py makemigrations
     $ python3 manage.py migrate
 
 To launch the server:
 
-    $ python3 manag.py runserver
+    $ python3 manage.py runserver
 
 then point a browser at http://127.0.0.1:8000/upload/
