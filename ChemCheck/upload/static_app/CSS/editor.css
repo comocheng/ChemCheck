@@ -1,0 +1,21 @@
+#editor {
+    position: absolute;
+    top: 15%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    }
+#btn-save {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+    left: 100%;
+    
+    }
+#btn-back {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+    left: 70%;
+    }
+    

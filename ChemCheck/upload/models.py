@@ -52,4 +52,3 @@ class Mechanism(models.Model):
                 setattr(self, name, val)
         # Save the model, with all the files
         super(self.__class__, self).save(*args, **kwargs)
-
