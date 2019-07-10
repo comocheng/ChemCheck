@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, DetailView, View
 from .forms import ChemkinUpload
 from .models import Mechanism
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
 import os
 from django.core.files.base import File
@@ -75,37 +75,29 @@ def ck2yaml(request, pk):
 class MechanismDetailView(DetailView):
     model = Mechanism
     
-def ace_mech(request, pk):
+def ace(request, pk, filetype):
     mechanism = get_object_or_404(Mechanism, pk=pk)
-    f = mechanism.ck_mechanism_file.path
+    
+    try:
+        f = {
+            'mechanism': mechanism.ck_mechanism_file,
+            'thermo': mechanism.ck_thermo_file,
+            'transport': mechanism.ck_transport_file,
+            'surface': mechanism.ck_surface_file,
+        }[filetype]
+    except KeyError:
+        raise Http404("Unknown file type {}.".format(filetype))
+
+    if not f:
+        raise Http404("No {} file in this model".format(filetype))
+    f = f.path
+
+    filename = os.path.split(f)[-1]
     content = open(f, "r").read()
     return render(request, 'ace.html', {
         'content': content,
-        'mechanism': mechanism
-        })
-def ace_therm(request, pk):
-    mechanism = get_object_or_404(Mechanism, pk=pk)
-    f = mechanism.ck_thermo_file.path
-    content = open(f, "r").read()
-    return render(request, 'ace.html', {
-        'content': content,
-        'mechanism': mechanism
-        })
-def ace_trans(request, pk):
-    mechanism = get_object_or_404(Mechanism, pk=pk)
-    f = mechanism.ck_transport_file.path
-    content = open(f, "r").read()
-    return render(request, 'ace.html', {
-        'content': content,
-        'mechanism': mechanism
-        })
-def ace_surf(request, pk):
-    mechanism = get_object_or_404(Mechanism, pk=pk)
-    f = mechanism.ck_surface_file.path
-    content = open(f, "r").read()
-    return render(request, 'ace.html', {
-        'content': content,
-        'mechanism': mechanism
+        'mechanism': mechanism,
+        'filename': filename,
         })
 
 def mechanisms_list(request):
