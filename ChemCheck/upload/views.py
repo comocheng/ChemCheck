@@ -78,34 +78,42 @@ class MechanismDetailView(DetailView):
 def ace_mech(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     f = mechanism.ck_mechanism_file.path
+    filename = os.path.split(f)[-1]
     content = open(f, "r").read()
     return render(request, 'ace.html', {
         'content': content,
-        'mechanism': mechanism
+        'mechanism': mechanism,
+        'filename': filename,
         })
 def ace_therm(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     f = mechanism.ck_thermo_file.path
+    filename = os.path.split(f)[-1]
     content = open(f, "r").read()
     return render(request, 'ace.html', {
         'content': content,
-        'mechanism': mechanism
+        'mechanism': mechanism,
+        'filename': filename,
         })
 def ace_trans(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     f = mechanism.ck_transport_file.path
+    filename = os.path.split(f)[-1]
     content = open(f, "r").read()
     return render(request, 'ace.html', {
         'content': content,
-        'mechanism': mechanism
+        'mechanism': mechanism,
+        'filename': filename,
         })
 def ace_surf(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     f = mechanism.ck_surface_file.path
+    filename = os.path.split(f)[-1]
     content = open(f, "r").read()
     return render(request, 'ace.html', {
         'content': content,
-        'mechanism': mechanism
+        'mechanism': mechanism,
+        'filename': filename,
         })
 
 def mechanisms_list(request):
