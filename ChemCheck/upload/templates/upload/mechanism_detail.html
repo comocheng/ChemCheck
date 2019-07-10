@@ -13,7 +13,7 @@
         <li>
           {% if object.ck_mechanism_file %}
             <a href="{{ object.ck_mechanism_file.url }}">{{ object.ck_mechanism_file }}</a>
-            <a href="ace_mech">
+            <a href="ace/mechanism">
               <button type="button" class="btn btn-primary btn-sm">Edit</button>
             </a>
             <a href="delete_mechanism">
@@ -26,7 +26,7 @@
         <li>
           {% if object.ck_thermo_file %}
           <a href="{{ object.ck_thermo_file.url }}">{{ object.ck_thermo_file }}</a>
-          <a href="ace_therm">
+          <a href="ace/thermo">
             <button type="button" class="btn btn-primary btn-sm">Edit</button>
           </a>
           <a href="delete_thermo">
@@ -39,7 +39,7 @@
         <li>
           {% if object.ck_transport_file %}
           <a href="{{ object.ck_transport_file.url }}">{{ object.ck_transport_file }}</a>
-          <a href="ace_trans">
+          <a href="ace/transport">
             <button type="button" class="btn btn-primary btn-sm">Edit</button>
           </a>
           <a href="delete_transport">
@@ -52,7 +52,7 @@
         <li>
           {% if object.ck_surface_file %}
           <a href="{{ object.ck_surface_file.url }}">{{ object.ck_surface_file }}</a>
-          <a href="ace_surf">
+          <a href="ace/surface">
             <button type="button" class="btn btn-primary btn-sm">Edit</button>
           </a>
           <a href="delete_surface">
