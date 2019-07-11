@@ -7,6 +7,7 @@ from django.core.files.storage import FileSystemStorage
 import os
 from django.core.files.base import File
 from django.urls import reverse_lazy
+from .ck2yaml import strip_nonascii
 
 
 # Create your views here.
@@ -97,7 +98,7 @@ def ace(request, pk, filetype):
     f = f.path
 
     filename = os.path.split(f)[-1]
-    content = open(f, "r").read()
+    content = strip_nonascii(open(f, 'r', errors='ignore').read())
     return render(request, 'ace.html', {
         'content': content,
         'mechanism': mechanism,
