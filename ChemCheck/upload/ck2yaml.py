@@ -1925,6 +1925,8 @@ class Parser:
         parser = Parser()
         f = os.path.split(input_file)[0]
         p = os.path.join(f, "error.txt")
+        if not p:
+            open(p, "w")
         if quiet:
             logging.basicConfig(level=logging.ERROR)
         else:

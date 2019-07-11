@@ -58,12 +58,14 @@ def ck2yaml(request, pk):
     except Exception as e:
         error = os.path.join(os.path.split(input_file)[0], 'error.txt')
         content = open(error, "r").read()
+        conversion_log += str(content)
         conversion_log += str(e)                      
         error_message = traceback.format_exc()
         conversion_log += error_message
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
+        open (error, "w").close()
     else:
         mechanism.ct_mechanism_file = out_name
         mechanism.save()
@@ -71,7 +73,6 @@ def ck2yaml(request, pk):
     return render(request, 'ck2yaml.html', {
        'mech': mechanism,
        'conversion_log': conversion_log,
-       'content': content,
     })
 
     
