@@ -98,7 +98,8 @@ def ace(request, pk, filetype):
     f = f.path
 
     filename = os.path.split(f)[-1]
-    content = strip_nonascii(open(f, 'r', errors='ignore').read())
+    with open(f, 'r', errors='ignore') as file_content:
+        content = strip_nonascii(file_content.read())
     return render(request, 'ace.html', {
         'content': content,
         'mechanism': mechanism,
