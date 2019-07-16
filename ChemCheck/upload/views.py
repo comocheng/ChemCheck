@@ -58,7 +58,8 @@ def ck2yaml(request, pk):
                         )
     except Exception as e:
         error = os.path.join(os.path.split(input_file)[0], 'error.txt')
-        content = open(error, "r").read()
+        with open(error, "r") as err:
+            content = err.read()
         conversion_log += str(content)
         conversion_log += str(e)                      
         error_message = traceback.format_exc()
