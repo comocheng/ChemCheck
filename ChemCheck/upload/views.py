@@ -7,6 +7,7 @@ from django.core.files.storage import FileSystemStorage
 import os
 from django.core.files.base import File
 from django.urls import reverse_lazy
+from .ck2yaml import strip_nonascii
 
 
 # Create your views here.
@@ -30,20 +31,22 @@ def upload(request):
 def ck2yaml(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
 
-    conversion_log = "Going to try this..."
+    conversion_log = "Going to try this...\n"
 
     from .ck2yaml import Parser
     import traceback
     import logging
 
-    parser = Parser()
+
     input_file = mechanism.ck_mechanism_file.path
     thermo_file =  mechanism.ck_thermo_file.path if mechanism.ck_thermo_file else None
     transport_file = mechanism.ck_transport_file.path if mechanism.ck_transport_file else None
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
     phase_name = None # will default to 'gas'
     out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
-
+    error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
+    open(error_filename, "w").close() # wipes the file it already existed.
+    parser = Parser()
 
     try:
         parser.convert_mech(input_file, 
@@ -56,12 +59,17 @@ def ck2yaml(request, pk):
                         permissive = True,
                         )
     except Exception as e:
+        
+        with open(error_filename, "r") as err:
+            content = err.read()
+        conversion_log += str(content)
         conversion_log += str(e)                      
         error_message = traceback.format_exc()
         conversion_log += error_message
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
+        
     else:
         mechanism.ct_mechanism_file = out_name
         mechanism.save()
@@ -93,7 +101,8 @@ def ace(request, pk, filetype):
     f = f.path
 
     filename = os.path.split(f)[-1]
-    content = open(f, "r").read()
+    with open(f, 'r', errors='ignore') as file_content:
+        content = strip_nonascii(file_content.read())
     return render(request, 'ace.html', {
         'content': content,
         'mechanism': mechanism,
@@ -202,10 +211,8 @@ class MechanismUpdateView(MechanismObjectMixin, View):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-
         form = ChemkinUpload(request.POST, request.FILES, instance=obj)
         if form.is_valid():
             form.save()
             url = reverse_lazy('mechanism-detail', args=[obj.pk])
             return HttpResponseRedirect(url)
-    
