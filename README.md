@@ -4,7 +4,7 @@ A tool to check chemistry, in the form of CHEMKIN and Cantera files.
 
 Initial setup, installing dependencies using conda:
 
-    $ conda create -n chemcheck -c conda-forge django\>=2.2.2 ruamel.yaml numpy
+    $ conda create -n chemcheck -c conda-forge django\>=2.2.2 ruamel.yaml numpy django-crispy-forms
     $ conda activate chemcheck
     $ cd ChemCheck
 

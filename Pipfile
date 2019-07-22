@@ -9,3 +9,4 @@ verify_ssl = true
 django = ">=2.2.2"
 numpy = ">=1.14"
 ruamel-yaml = ">=0.15.97"
+django-crispy-forms = ">=1.7.2"
