@@ -5,6 +5,7 @@ from .models import Mechanism
 from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
 import os
+import re
 from django.core.files.base import File
 from django.urls import reverse_lazy
 from .ck2yaml import strip_nonascii
@@ -66,6 +67,16 @@ def ck2yaml(request, pk):
         conversion_log += str(e)                      
         error_message = traceback.format_exc()
         conversion_log += error_message
+
+        match = re.search('Unable to parse .* near line (\d+):', content)
+        if match:
+            conversion_log += '\n\n'
+            line_number = int(match.group(1))
+            with open(input_file) as ck:
+                lines = ck.readlines()
+            context = 4
+            excerpt = lines[ max(line_number-context,0):min(line_number+context, len(lines)) ]
+            conversion_log += '\n'.join(excerpt)
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
