@@ -5,7 +5,7 @@
 <form action= "delete_thermo" method='POST'>{% csrf_token %}
     
     <h1>Do you want to delete the file "{{ object.ck_thermo_file.name }}"?</h1>
-    <p><input type='submit' value='Yes' />  <a href='../'>Cancel</a></p>
+    <p><input type='submit' value='Yes' />  <a href='/mechanism/{{ object.id }}'>Cancel</a></p>
     
 </form>
 
