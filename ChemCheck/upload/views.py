@@ -72,7 +72,8 @@ def ck2yaml(request, pk):
         if match:
             conversion_log += '\n\n'
             line_number = int(match.group(1))
-            with open(input_file) as ck:
+            error_path = match.group(0).split("'")[1]
+            with open(error_path) as ck:
                 lines = ck.readlines()
             context = 4
             excerpt = lines[ max(line_number-context,0):min(line_number+context, len(lines)) ]
