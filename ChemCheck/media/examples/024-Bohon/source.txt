@@ -1,0 +1,6 @@
+Myles D. Bohon, Thibault F. Guiberti, S. Mani Sarathy, William L. Roberts, Variations in non-thermal NO formation pathways in alcohol flames, Proceedings of the Combustion Institute, Available online 4 July 2016, ISSN 1540-7489, http://dx.doi.org/10.1016/j.proci.2016.05.024.
+(http://www.sciencedirect.com/science/article/pii/S1540748916300244)
+Abstract: Abstract
+This work investigates the formation of NO in a range of laminar, premixed, burner-stabilized C1 to C3 alcohol and alkane flames, in the equivalence ratio between 0.8 and 1.2. Measurements of temperature and NO concentration were conducted, and simulations utilizing the measured temperature profile allowed for the comparison of predicted NO with experiment, as well as a detailed investigation of the contributions from a number of NO formation pathways. In the alcohol flames, reduced contributions to Prompt NO were observed along with reduced consumption of NO through the NO–HCN Reburn mechanism, demonstrating the importance of hydrocarbon radicals (CH, CH2, CH3, and HCCO) to NO formation. Additionally, significant contributions to NO through the combined NNH and N2O mechanism were observed, representing a greater proportion of the NO produced in the alcohol flames.
+Keywords: NOX; Alcohols; Prompt NO; Reburn; Non-thermal NOX
+
