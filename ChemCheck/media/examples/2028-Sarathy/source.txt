@@ -1,0 +1,18 @@
+S. Mani Sarathy, Stijn Vranckx, Kenji Yasunaga, Marco Mehl, Patrick Oßwald, Wayne K. Metcalfe, Charles K. Westbrook, William J. Pitz, Katharina Kohse-Höinghaus, Ravi X. Fernandes, Henry J. Curran, A comprehensive chemical kinetic combustion model for the four butanol isomers, Combustion and Flame, Volume 159, Issue 6, June 2012, Pages 2028-2055, ISSN 0010-2180, http://dx.doi.org/10.1016/j.combustflame.2011.12.017.
+(http://www.sciencedirect.com/science/article/pii/S0010218011004263)
+Abstract: Alcohols, such as butanol, are a class of molecules that have been proposed as a bio-derived alternative or blending agent for conventional petroleum derived fuels. The structural isomer in traditional “bio-butanol” fuel is 1-butanol, but newer conversion technologies produce iso-butanol and 2-butanol as fuels. Biological pathways to higher molecular weight alcohols have also been identified. In order to better understand the combustion chemistry of linear and branched alcohols, this study presents a comprehensive chemical kinetic model for all the four isomers of butanol (e.g., 1-, 2-, iso- and tert-butanol). The proposed model includes detailed high-temperature and low-temperature reaction pathways with reaction rates assigned to describe the unique oxidation features of linear and branched alcohols. Experimental validation targets for the model include low pressure premixed flat flame species profiles obtained using molecular beam mass spectrometry (MBMS), premixed laminar flame velocity, rapid compression machine and shock tube ignition delay, and jet-stirred reactor species profiles. The agreement with these various data sets spanning a wide range of temperatures and pressures is reasonably good. The validated chemical kinetic model is used to elucidate the dominant reaction pathways at the various pressures and temperatures studied. At low-temperature conditions, the reaction of 1-hydroxybutyl with O2 was important in controlling the reactivity of the system, and for correctly predicting C4 aldehyde profiles in low pressure premixed flames and jet-stirred reactors. Enol–keto isomerization reactions assisted by radicals and formic acid were also found to be important in converting enols to aldehydes and ketones under certain conditions. Structural features of the four different butanol isomers leading to differences in the combustion properties of each isomer are thoroughly discussed.
+Keywords: Butanol isomers; Chemical kinetic modeling; Bio-butanol; Reaction rate rules; Alcohol combustion
+
+
+!!!!!!!!!
+
+Duplicates
+ic4h7oh and ic3h5ch2oh
+sc3h5cho and ch3chchcho
+sc3h5co and ch3chchco
+
+Check
+c3h6oh, and as a result: ohc3h6o2
+c3h5-s
+c3h5-t
+

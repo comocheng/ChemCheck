@@ -1,0 +1,552 @@
+Received: from CY4PR06MB2743.namprd06.prod.outlook.com (10.173.40.20) by
+ CY4PR06MB2743.namprd06.prod.outlook.com (10.173.40.20) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384_P384) id
+ 15.1.639.5 via Mailbox Transport; Mon, 26 Sep 2016 18:29:54 +0000
+Received: from BY2PR06CA044.namprd06.prod.outlook.com (10.141.250.162) by
+ CY4PR06MB2743.namprd06.prod.outlook.com (10.173.40.20) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384_P384) id
+ 15.1.639.5; Mon, 26 Sep 2016 18:29:50 +0000
+Received: from BY2FFO11FD045.protection.gbl (2a01:111:f400:7c0c::127) by
+ BY2PR06CA044.outlook.office365.com (2a01:111:e400:2c60::34) with Microsoft
+ SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384_P384) id 15.1.639.5 via Frontend
+ Transport; Mon, 26 Sep 2016 18:29:50 +0000
+Authentication-Results: spf=fail (sender IP is 155.33.28.212)
+ smtp.mailfrom=kaust.edu.sa; northeastern.mail.onmicrosoft.com; dkim=fail
+ (signature did not verify)
+ header.d=kaust-edu-sa.20150623.gappssmtp.com;northeastern.mail.onmicrosoft.com;
+ dmarc=none action=none header.from=kaust.edu.sa;northeastern.edu; dkim=fail
+ (signature did not verify) header.d=kaust-edu-sa.20150623.gappssmtp.com;
+Received-SPF: Fail (protection.outlook.com: domain of kaust.edu.sa does not
+ designate 155.33.28.212 as permitted sender) receiver=protection.outlook.com;
+ client-ip=155.33.28.212; helo=outlook.neu.edu;
+Received: from outlook.neu.edu (155.33.28.212) by
+ BY2FFO11FD045.mail.protection.outlook.com (10.1.15.177) with Microsoft SMTP
+ Server (version=TLS1_0, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA_P384) id
+ 15.1.629.5 via Frontend Transport; Mon, 26 Sep 2016 18:29:49 +0000
+Received: from nb8249.neu.edu (155.33.28.22) by BOS8010.nunet.neu.edu
+ (155.33.28.212) with Microsoft SMTP Server (TLS) id 14.3.224.2; Mon, 26 Sep
+ 2016 14:29:11 -0400
+X-ASG-Debug-ID: 1474913007-05dcfa05a621a330001-izmBbL
+Received: from mail-qk0-f170.google.com (mail-qk0-f170.google.com
+ [209.85.220.170]) by nb8249.neu.edu with ESMTP id CvWYT8KnaJmkyzpG
+ (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NO) for
+ <r.west@neu.edu>; Mon, 26 Sep 2016 14:03:27 -0400 (EDT)
+X-Barracuda-Envelope-From: wang.juiyang@kaust.edu.sa
+X-Barracuda-Effective-Source-IP: mail-qk0-f170.google.com[209.85.220.170]
+X-Barracuda-Apparent-Source-IP: 209.85.220.170
+Received: by mail-qk0-f170.google.com with SMTP id z190so173322192qkc.3
+        for <r.west@neu.edu>; Mon, 26 Sep 2016 11:03:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kaust-edu-sa.20150623.gappssmtp.com; s=20150623;
+        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+         :cc;
+        bh=QD0bEFim81se0JRhNcZgALFSPThaJ4r0BGfksG7cHJE=;
+        b=w6pqBdUFK3vHMQVBfrlppY8biB02gYyYy+ffS/DW6tfiND8S5SAI2I9IsLjk2EaA4s
+         CsLOeQxD6gb4+5l14ZoswI4wXZVqt03lxNY/dCQFFbds1RdRElzqcrcGEnlm++QGt1KU
+         qFuIu1mw60YiygiJNJccVXRTMkPrUB8lOUD9QEkU0bpFEX+ES0b8G7G0xHlqgIb+ADs5
+         QA8ROxi0I8PHjqC/w2/InGBAMBKPPE7nySjJTTAgP5HvSUib1g7Ibano9zeSbFf/vOgw
+         b4+0mUC2RNNDeED4uMVAG0FXiZVm5bb2/SO+mnlunNZReUIKB1RQ5B+bV3+mzq8gFiY1
+         OYIg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20130820;
+        h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc;
+        bh=QD0bEFim81se0JRhNcZgALFSPThaJ4r0BGfksG7cHJE=;
+        b=dcVA5Lo+CjSDv+KCjnCUf1LhPm+v+bUHBLBz6Sh+PL4/DsJ7NH4lRux0f1eCmWSFjp
+         bCX8aCj9jm4TR/bD2U50wEneuwqol1G54uRPrPwHAJ263vmghwj3S4uvYWqCBxdFPt3d
+         K/t2imx/V4RA0wQmChNtB+dtXe0QwAX2vedSBYlxuXgkQeTVBkYmVicx1LiRzUsyT/3y
+         x9T+1WNGAUDmP33aUCglC5x2eXf+iwRjq742TxLsztV9YBb52BUnkEg7dAPDQ7dVWHCt
+         nfuH+yqZ2ewtHsY02AQirQwHs0vxMEMDVGNKJeDSlSnUv4xk68FCt5tlBDhvppoVwChN
+         L3fg==
+X-Gm-Message-State: AA6/9RmOfcRdVPELx25xjlr0UlkwPLvn721ekFCStNYno0FnNerxPa5CnhQjVnlpSvHdYRDQImhGEsy5ISQnT8waJUfW6XWPfzYBUeidI6O+R9lyHQEYfWYSpbMqJfdEIy/FiJTN
+X-Received: by 10.194.90.174 with SMTP id bx14mr19135334wjb.41.1474913004711;
+ Mon, 26 Sep 2016 11:03:24 -0700 (PDT)
+Received: by 10.28.8.145 with HTTP; Mon, 26 Sep 2016 11:03:23 -0700 (PDT)
+In-Reply-To: <E3CAA5DC5C4A414E9C9C6B58630016B8014150FF03@OC11EXPO30.exchange.mit.edu>
+References: <CAB3OpTxNHEALJ51+RGDvDUy3Pfx4Uc+MOitaZ94c2pSJVRAoyQ@mail.gmail.com>
+ <E3CAA5DC5C4A414E9C9C6B58630016B8014150FF03@OC11EXPO30.exchange.mit.edu>
+From: Wang Jui Yang <wang.juiyang@kaust.edu.sa>
+Date: Mon, 26 Sep 2016 21:03:23 +0300
+Message-ID: <CAB3OpTw3VXbgj+ok9V9Cjxq84jpktR2up9o1nKFMRLVLbc=9-A@mail.gmail.com>
+Subject: Fwd: RMG database compiling help
+To: <r.west@neu.edu>
+X-ASG-Orig-Subj: Fwd: RMG database compiling help
+CC: Nathan Wa-Wai Yee <nyee@mit.edu>
+Content-Type: multipart/mixed; boundary="047d7bd8fdfab9494f053d6cf121"
+X-Barracuda-Connect: mail-qk0-f170.google.com[209.85.220.170]
+X-Barracuda-Start-Time: 1474913007
+X-Barracuda-Encrypted: ECDHE-RSA-AES128-GCM-SHA256
+X-Barracuda-URL: https://155.33.16.210:443/cgi-mod/mark.cgi
+X-Barracuda-Scan-Msg-Size: 16467
+X-Barracuda-BRTS-Status: 1
+X-Virus-Scanned: by bsmtpd at neu.edu
+X-Barracuda-Spam-Score: 1.00
+X-Barracuda-Spam-Status: No, SCORE=1.00 using global scores of TAG_LEVEL=3.0 QUARANTINE_LEVEL=1000.0 KILL_LEVEL=6.0 tests=BSF_RULE_7582B, BSF_SC0_SA074, HTML_MESSAGE
+X-Barracuda-Spam-Report: Code version 3.2, rules version 3.2.3.33242
+	Rule breakdown below
+	 pts rule name              description
+	---- ---------------------- --------------------------------------------------
+	0.50 BSF_SC0_SA074          URI: Custom Rule SA074
+	0.00 HTML_MESSAGE           BODY: HTML included in message
+	0.50 BSF_RULE_7582B         Custom Rule 7582B
+Return-Path: wang.juiyang@kaust.edu.sa
+Received-SPF: Pass (BOS8010.nunet.neu.edu: domain of
+ wang.juiyang@kaust.edu.sa designates 209.85.220.170 as permitted sender)
+ receiver=BOS8010.nunet.neu.edu; client-ip=209.85.220.170;
+ helo=nb8249.neu.edu;
+X-OrganizationHeadersPreserved: BOS8010.nunet.neu.edu
+X-MS-Exchange-Organization-Network-Message-Id: 00b423af-db45-474d-ce15-08d3e63b198a
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Organization-MessageDirectionality: Originating
+X-Forefront-Antispam-Report: CIP:155.33.28.212;IPV:NLI;CTRY:US;EFV:NLI;SFV:NSPM;SFS:(7916002)(2980300002)(1110001)(3190300001)(339900001)(489007)(377454003)(199003)(2473002)(252514010)(22974007)(189002)(1720100001)(586003)(2476003)(189998001)(21480400002)(55446002)(61726006)(568964002)(11100500001)(74482002)(110136003)(4610100001)(555904002)(4810100001)(5660300001)(61266001)(85426001)(5890100001)(84326002)(59536001)(2171001)(87936001)(19580395003)(19580405001)(92566002)(450100001)(626004)(4326007)(42882006)(9896002)(2950100002)(19617315012)(1096003)(8936002)(88552002)(305945005)(15975445007)(7906003)(7846002)(5002510100001)(3900700001)(512954002)(512874002)(42186005)(956001)(105606002)(8676002)(93516999)(86362001)(106466001)(76176999)(50986999)(54356999)(63696999)(18206015028)(98316002)(356003)(8576002)(9686002)(246002)(2351001)(55456009);DIR:INB;SFP:;SCL:1;SRVR:CY4PR06MB2743;H:outlook.neu.edu;FPR:;SPF:Fail;PTR:bos8010.nunet.neu.edu;A:1;MX:1;LANG:en;
+X-Microsoft-Exchange-Diagnostics: 1;BY2FFO11FD045;1:QIrNaJp8kQK6szf1Xj2Oh1PiXxGqfocI0SIVrKZR3/aJnIK2OxTQmT1BYQGHl6duzjZOETvEiR5XJ26SWdoqhS/sfvZQCqfh+yAYejfniQvv9IFFpdk0J7H/dvgL5AMOWhAX1eGrezx8pDY7hlzXxJbPdtnEuZ6SOjiVRpOwBWRXHTdp395co+JVQTKQE/3vsFDmAUS1/vPSVk7A14b+4BLf8Z43EoPaKG+I8FpHbHdMChhNFO/iebVtbQ3bFpLNc1JudbZ+FgWPJeN/gB/tHA0eTUixpQx/msXiOFr05tcCCVIofHp8/YR5ZBTyZgXG6WMLbbmC6H0smnRuQZvoCDvXv6/F/EAnoyuAHH19YJV4uLWTiUE2Q/hz2tEFEvMZcNM6gCD/ZU/++TJgu0fRmebUDHcoTG7oQiGr9XEsDpbp37wL+zXAOkHx0XEy/W9J63HkPiKx6tSmy7W9ZDG88FfE8c35CHo4qh7FPmukCzzGPlDRMudDgpYb0hZFxxU9WysflqalKm/CW7XCfC+t65h6s14QLqskETCtLheovIFbZKZJcoTU0MhuhkZuUenjWBRFWSf90QwkjAdTKBPQizfMaUoNfAVBJbqtoLRlhpmVl+zBHP/tj1UpuLmstYo4gnyzYE3UjCnn0j9P+6xb8g==
+X-MS-Exchange-Organization-PRD: kaust.edu.sa
+X-MS-Exchange-Organization-SenderIdResult: Pass
+X-CrossPremisesHeadersPromoted: BY2FFO11FD045.protection.gbl
+X-CrossPremisesHeadersFiltered: BY2FFO11FD045.protection.gbl
+X-MS-Office365-Filtering-Correlation-Id: 00b423af-db45-474d-ce15-08d3e63b198a
+X-Microsoft-Exchange-Diagnostics: 1;CY4PR06MB2743;2:KY8AO+N2YlVdwWWZR3/rlRiaPBCINVBadyNJ+5g5BvSfRspTF2auL+bcr3HMctx/ptrzT3Ufcw1VXGhNw5pxSi0SQveA5tJrvu4UItfOQB0Um/1hUl9xnO46w6vQ/rk3aeGBNoH4qYLAUzodjdvDOUIQZ6ksMSuzBPYuCFxq4cPu6dKBcfZb2Bo6GrEWcGqo;3:DJIrj/6WnTdNsYauas5Qfa51ZVHmoWnXAlnK8sHYygiafCLLLLqjhyEjs9hfUtMB974d3v7UAQ1i4tbBCERPR4BBvLOA/8gTj4sBT6lfivSWOtafXT8VSy7TWW6NT6jVVhEsHne0x9x8/EeGBEt2x/8Bgn6uAvxbhqqjwtrTmF+lhrq5W+SjGQtUGhTza1kXpXKU679AuUJcwoqAkTivsvAZ0JMLUGO5vH0Wmsz0vMVUpg2qx1L3AG3CPwLBei+C;25:Np50BwqIxGBS+BW75jN8xUZ2lFi74Hmd3o5oCWatZowjS5sItyHFdgvReRNAjbMFPqYNzZnoUm15Rt5ABWLlQCm8/ndt+p5fU/YU8Qv/5VYvmsczIoUW00MFkpO5ltkJtxhTNR+GBfdLBRLasql3yjMasLT06B2Ok0NWXAzX+TuDhEWXHnBSsHvKwolA507qJGpv1LMo6I0CdYdvKgXXL/E9ocG4VNpvN40mrgHxoFH1IjHjA+sNU7accM/3N8yNIeUdPs6/dRFid/f+3E7f8tOkl1jlxl3S5x4m2avGffO9Ezjq0cuzOR+W+OXoekoVk6MzduMhpIP4RFzvwP87whI6fSuldfFfrhs0TgEJWSHHbvF2JvT2fx6MRKlyXxpLbMvxvOwIaki460BlJZOxKn/nq4YLdppXGu/a0zQX294kYAYUT42arZbyXDiLEloPciXvgH7eGphldz6yFPU3FQ==
+X-DkimResult-Test: Failed
+X-Microsoft-Antispam: UriScan:;BCL:0;PCL:0;RULEID:(3002016);SRVR:CY4PR06MB2743;
+X-MS-Exchange-Organization-AVStamp-Service: 1.0
+X-Microsoft-Exchange-Diagnostics: 1;CY4PR06MB2743;31:8Bb5q7WZa/8pyfgHwMjajcpAsDSGgyydh0r8kA9ntaeZD3jaXuGyoET8DIsYgmLLagTbBvx+bzkPQ/gmxjiqlfBihSyjSd8lEJQ2XyhRp6Tkp0yQVsbc3Ip9nqGV0YRGZ6qMXjFIqm5E5V6izpEaf0LKHbwiRpARZwDSUPMFdV3NgdyBLsvyTNy/Fc6oVDY6d8H92puDLBfomvXr5NXmRL1LOzs+9W6hV8K0hKEJCm0UsHWQ5nueh5HnOH7Gf6GjSg691q/AOvNrh+N5DIrj53sdDTx9CucmP6W6zT/Gpvc=;20:w9imuWJ+aUkHc7kQYO2cXS8PqPePgTPEllIAoijqQFSqPATBUGJIdY0zQCHHwrfkCe+di0+JSdOgonxOqY9bZN9+2+sd8uG8mDD7eqopjvfWn2YaEErn/+v9Uhm/P1nQ8J7ZXi61PUjFvW0q/fS5O/6jPXT05YmQ0vrFIzx9kop4aTxzNrkzeGx/Tou00UBKQk7RH0NBxSwZn1JRvsmes33kMT9yPT5lJ7+MwlOVIi59tlXBrSz+bxIyvE00l0iBPyhnpsyjJVIo/Lz8kVeELjPKmBJBgK+sTalJ/XxqXPxdw5nEgqpUmw0CoO0lYk5j0Tua1Ga9XMIM5BkC6C00vwEHIY3srFK0ykONbDjUEikXYT98Gg2x7SJAJjSVmIWt19BpOEK8iE+PNIukKEPWzShtIKXypEDkXvKZEyTzhiQlY4Lq4defmxHH8QGmMzZaHysgqQw6UoXIUwnDKZUx0/Ja5S6MIPCGe7FWuEUpfnL8yFwu2fjsJmLArgW3r5BH
+X-Exchange-Antispam-Report-Test: UriScan:(166708455590820)(211936372134217)(119230021023882);
+X-Exchange-Antispam-Report-CFA-Test: BCL:0;PCL:0;RULEID:(102415321)(601004)(2401047)(8121501046)(13014025)(13022025)(13016025)(13018025)(10201501046)(3002001);SRVR:CY4PR06MB2743;BCL:0;PCL:0;RULEID:;SRVR:CY4PR06MB2743;
+X-Microsoft-Exchange-Diagnostics: 1;CY4PR06MB2743;4:kXgVvif2m0cc4lNTfCiAeI9rtVj16gYHKOEsCVSVKIaunT3AAEAZytX//08cM6of9nvQyQaaUd9k27lEDOwuHt1Cv6C/sYtwRztycOGj5wuOfyMGyolaXVodpuxE8K7OLrbqMhfxMwudlQUk9AKA7avkanhBsZn7MkdXSKhvtkcZeJrD9F7k0YGGtn9CEAoa/tus7B6ZJW37evB7oKmiKWLRdNERha6a5952NSZxcHEHdJQWocOVmuSa/IjU3lu7WQnF/sSix1OIqAz4ZD7U6odtAdxEpp3QqVos4IdqOkaiyciCN7Oqo2NawH1vm422uqjVu47UUC2prJqR/mqjJuqRg56yvj4CddXNfdi2uC90W/i47sadlw9kQKAyK0s4I1Fl2KVM5DWoXiqdgpyhR27IbnzofeN6lEuaiRAPvBSauS7TDvozqLoawCoCQprhcsxJtHYexKi3ZmIZ466jcKgd86o8JxFgUnfsZBzja+pPjJSKjk3El8wrMCqLuOGQuCKEEridGDv29LG8B3DRZRJDeyQYjixbkgPo3XLryaB9pZJXlzDAMKvjWUiw+MpA
+X-MS-Exchange-Organization-SCL: 1
+X-Microsoft-Exchange-Diagnostics: =?us-ascii?Q?1;CY4PR06MB2743;23:bkhClw6ypzFa9rcZ/e1Iaf4RpIJ5YcbYkq8H49YEf?=
+ =?us-ascii?Q?GQqSHcvmG0nZpIhH/h6UDjhwKyndanrbN4HN0USPd4XeiNTIuksD3szHQIuE?=
+ =?us-ascii?Q?dmyIjjSsDAEcmI7mnj0GHad+NqJIyL/dIFOqn5kPamZYcKy+5+RjZx6fmUZW?=
+ =?us-ascii?Q?PTdvh+unxfqBjv4yzHhfUKASxGHge1P3cA/dDwqvWQxzvKGnRYfKsLcuBww9?=
+ =?us-ascii?Q?Q7XCFEyaE2oMJAJixyAOgA61FIoLZy7/jbj9TqO62tV8aB68CjNA8EYndlfO?=
+ =?us-ascii?Q?QnB295Hj4PMtFC7fdeVIftjwTxWFOjrJiB7VSrJgbXiKYgQgoV7eOVxUQ0xs?=
+ =?us-ascii?Q?Tnq+jDrayPUtSI6SNh1UXsoWZaezWAwV9FrmLRj7LnrEAs/bDXqHprQsxFkv?=
+ =?us-ascii?Q?tsWJgFb0ZQk9kz5kldqJ84mhi3Vvaequ51adlBEJOsSNJ/94frVyap6bpQXy?=
+ =?us-ascii?Q?r3PrggYTB4t92xRnkBDyyIxJvT/6x7zbTQR8U/Z7KUbKVCOnXNoOcMp9/S7c?=
+ =?us-ascii?Q?JQHzkGKegaNHnwjTfVTri1gM3aURRba3mjyMzWWWw7blve1HHPBsO5fYB27C?=
+ =?us-ascii?Q?OhZSUeWQGbYbH8MiyN6k9QIxtiSlUq5rQHcc4lpip5XaDquaOrLsxdV5q4fi?=
+ =?us-ascii?Q?lkte9/aXHEQ0zmYBZiHIaeFY/iIGelE3yfkRtdR/Q7Fyp6FvXokBATR0O9Jz?=
+ =?us-ascii?Q?p9Lkg+33T1LOQ8sB3HAaayCvLIRuXxXOQjl1q8giIXNW68fccMplD7B5SsZQ?=
+ =?us-ascii?Q?n1Wj8cfm1YYkZtQZSZpNrHRW8JLI0qIhsuWM5rJruFEyDl6mb4lsgkMwM/iP?=
+ =?us-ascii?Q?wfUakAyNPCE6CkJNu+ux/qgA+s7A+8sqysIcXQIutUjV76s0A8afi8dHtSm6?=
+ =?us-ascii?Q?zDR2RCr2bdliWdXSoop9WxbmEorw1kdMsezWX35LjQyUENoj2cVmsl80D0nB?=
+ =?us-ascii?Q?7GXxGso6y+qDttVgorFiFBN/Wh2EZHggpQfo3AmznVrpnfaqU6clmUleVoGz?=
+ =?us-ascii?Q?8mbNn8KbFv1bcyyNS+y3IurXfFOVUFwRIoiTDje8AMTCJNtztrQercwAYqQ1?=
+ =?us-ascii?Q?aIN039ylnr+mA6+p+Zj1qF9W94RMWlN4LfrMK4S31V3YbZoVuKqK6iASniZs?=
+ =?us-ascii?Q?kSij4K7o3RuzL/HsLRy1KNY+lR1QRjC9Cg89g2/6lp9X0oq+lPouGGw/EUZB?=
+ =?us-ascii?Q?XxLk0sn+R6I/BlSW986HrXPGqAEmXrdWUYW1WJhCsO2YMEWIZHYwbbU+chQC?=
+ =?us-ascii?Q?WtbY3KRNtqCe2OUcRrXXByAtLURmjW7yBcDQ6/2pq69sB8rPGxRjMFUB/3Nj?=
+ =?us-ascii?Q?nTlbxtujtDsc/+xQfWMKMbKIMjQn+Ags4Y+I3CUsiMuhg5UKqajdKncz7fLZ?=
+ =?us-ascii?Q?U6a42RXoPX97Q9NmRJD0gVlan23YxnnidVee7UrGGOfhMmR2HVgzuVIbzeiV?=
+ =?us-ascii?Q?YLQvso4J8IKJ4ZOz4NXZQU3u4IE4N7YNGF408nPlqSGlo/8RA5Cs3DthHWah?=
+ =?us-ascii?Q?HnhGC5siGFlTJhoxrjxC0sonvvLm/kBw3vX6xT4TWangyP+EA0jKbyZ+uFAt?=
+ =?us-ascii?Q?OD7yMAzCiKmzuXqFnsFjZJvmRNcAMJL81n2s6YGkeaj8ttG/GeeS4/wdM3Nx?=
+ =?us-ascii?Q?TWiUPUQu76d8tQfmXm1iRR3h2QMTm+nV6aWRPDQrkEyG2DO6uWnIyIXGbuBF?=
+ =?us-ascii?Q?YXoG1zZo6AgrTMAc7BaptMgYg6eQgY+sDct1mbbW1K133O4uFWsqRIB3i1km?=
+ =?us-ascii?Q?Qh83PQxTmUxcnLT6HkrD9pqVLUzNQ=3D=3D?=
+X-Microsoft-Exchange-Diagnostics: 1;CY4PR06MB2743;6:fqPxotElVep7vD81WFYpr0IrEPc9Yirpx28GwWLLWA1dBR7fybFvxM+zY/uXaDNaSM4Dpn1NOAfqDknlvgdz/m1ZyWO2M6aVPhzuKYQ8bz8aXwYm3v3MkDyooQWQWPlyDWtZan1gJmWDJj7NOZ8nX0uK8XSOq7uHSwyQVOvVrt+qBr7FT8WncU+y8j+cWgBMxYgMBNVwrnJFnSKzR+1EIpYM4uTihhPRhtpFjfu2a35vKZVcb/T8ExN0n0MV7RdqPIQkDK94bApdsxkL4q00MHYMJou7O49nXWPg0swOFUL+LEelFbvvS7mDF9Nt7Y8H;5:HlodFMBnV1MAEMmYgkMVqSl4MA+bjJ3LRk+CIaiOITNpYR6UpzWmGaqRxJVPvkgdn3SFp7qcF5fHOHphlhr58HoxKqlUw08IiDnHpiI+i/4J1ZCOJJYmv1dpm4d67BOu8m+vGYMIw4r7TQR9lQUtnw==;24:QHmxMvi7f2bgm7S1gNLK81Z0dbzy8VsGW3IaKw5P6uX9GxbYCTgnuJ1RAozv+5CEQCPDMpwyeVA4Itp/qgijFsmCXBy4EaiFfBrqkPyTX+U=;7:vKcb3EWD9tY4pP+vIQVkXMcjpS4cOvGhswb/9AxkD5sFkJTuRoNxH98m+YK5q7m9RdsdJf4zpdGAbI8TONv+ytaATyWqK0CPn9E8UduiOXI7uJ6gXheaWZMIfjjlVSLVVqh/X7EH0l6cfHLlFHTGCLJjXeHcRKKZV2/nXNtdk4yd0kcW9FMTNFlwuOxwYDXsr40mZNE88YDtJYzV3RfBviFU38UtKtv1S7NugY1PbXD+tspa1L4UU2fgC2tQk7WCQB9iIaJepQholK0vjUrDehZMXFQHxyk/5HzUlQLld0AmvD3oCIhRutcIh3WLrSbYOQeEaMy/+m0EYTjnGnKuzw==
+SpamDiagnosticOutput: 1:99
+SpamDiagnosticMetadata: NSPM
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Sep 2016 18:29:49.0678
+ (UTC)
+X-MS-Exchange-CrossTenant-Id: a8eec281-aaa3-4dae-ac9b-9a398b9215e7
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=a8eec281-aaa3-4dae-ac9b-9a398b9215e7;Ip=[155.33.28.212];Helo=[outlook.neu.edu]
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY4PR06MB2743
+X-MS-Exchange-Organization-AuthSource: BOS8010.nunet.neu.edu
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-OriginatorOrg: northeastern.onmicrosoft.com
+X-MS-Exchange-Transport-EndToEndLatency: 00:00:05.3118051
+X-Microsoft-Exchange-Diagnostics:
+	1;CY4PR06MB2743;9:4eRCjU3zzOOMMckChCIoFore8pxaQ+kf8PJOopNg7OGfgR6OVTa94T1lUF4sSy+YZyy+yoNPHiT8zA4dqP8IT974ceFGze4HeqKyMMm29fFqzLCR8lZubba6tLvhkSslhNoW6YLQQgqkY/BIV5+bDNWXXNXTPIsWoGK/i6DviECk38jSazR3L5fFbl6zSP3ris4p7R6996hq2VqcxcV71A==
+MIME-Version: 1.0
+
+--047d7bd8fdfab9494f053d6cf121
+Content-Type: multipart/alternative; boundary="047d7bd8fdfab9494a053d6cf11f"
+X-Microsoft-Exchange-Diagnostics:
+	1;CY4PR06MB2743;9:4eRCjU3zzOOMMckChCIoFore8pxaQ+kf8PJOopNg7OGfgR6OVTa94T1lUF4sSy+YZyy+yoNPHiT8zA4dqP8IT974ceFGze4HeqKyMMm29fFqzLCR8lZubba6tLvhkSslhNoW6YLQQgqkY/BIV5+bDNWXXNXTPIsWoGK/i6DviECk38jSazR3L5fFbl6zSP3ris4p7R6996hq2VqcxcV71A==
+
+--047d7bd8fdfab9494a053d6cf11f
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Microsoft-Exchange-Diagnostics:
+	1;CY4PR06MB2743;9:4eRCjU3zzOOMMckChCIoFore8pxaQ+kf8PJOopNg7OGfgR6OVTa94T1lUF4sSy+YZyy+yoNPHiT8zA4dqP8IT974ceFGze4HeqKyMMm29fFqzLCR8lZubba6tLvhkSslhNoW6YLQQgqkY/BIV5+bDNWXXNXTPIsWoGK/i6DviECk38jSazR3L5fFbl6zSP3ris4p7R6996hq2VqcxcV71A==
+
+Dear professor West,
+
+My name is JuiYang Wang (Ray) as a master's student in combustion research
+center, KAUST in Saudi Arabia. A PhD student, Nathan, from MIT kindly
+advised me to seek your help for an issue between Chemkin and RMG. The
+attachment is the kinetic and thermodynamic files in Chemkin readable file
+which describes the fuel I'm now working on and developed by professor
+Dooley. And I hope to develop some useful low temperature oxidation
+mechanisms using RMG. After checking the Libraries of RMG, they have quite
+different format and it may take a long time for creating adjacency list
+manually. Therefore, may you set a job or let me know what should I provide
+for it to work easier?
+
+T
+=E2=80=8Bhank you for your help
+
+Sincerely yours,
+=E2=80=8B
+Jui-Yang, Wang
+
+Master Student
+Clean Combustion Research Center (CCRC)
+King Abdullah University of Science and Technology
+Thuwal, 23955-6900, Saudi Arabia
+Mobile number: +966 570820131
+Email: wang.juiyang@kaust.edu.sa
+
+
+---------- Forwarded message ----------
+From: Nathan Wa-Wai Yee <nyee@mit.edu>
+Date: Mon, Sep 26, 2016 at 6:39 PM
+Subject: RE: RMG database compiling help
+To: Wang Jui Yang <wang.juiyang@kaust.edu.sa>
+
+
+Hi JuiYang,
+
+For your first problem, the major obstacle is that you must define the
+chemical structure of each species in the chemkin file. We have some
+automated tools to help you. You have two options. Option 1 you can do
+completely independently, but it might take longer. Option 2 is faster, but
+you'll have to contact Professor Richard West at r.west@neu.edu.
+
+Option 1: We have a script to convert chemkin mechanisms to reaction and
+thermo libraries. I have attached it, but you could also find it under
+RMG-database/scripts. For this option, you will need to create an RMG
+dictionary (see attached dictionary.txt for an example) to input into the
+the script. Unfortunately, this is somewhat manually intensive. To make the
+RMG dict you again have two options, 1a and 1b.
+
+Option 1a: Use our website tool to manually create each adjacency list
+http://rmg.mit.edu/molecule_search
+
+Option 1b. Use the script here to create it from an inputted list of
+smiles. https://github.com/ReactionMechanismGenerator/
+Work-In-Progress_scripts/blob/master/RMG_input/smilesToDictionary.py
+
+Option 2. Professor Richard West who is a close collaborator with us has
+created a tool that will try to guess the chemical structure from the
+chemkin file's thermochemistry. You will need to email him to ask him to
+set up a job to do it. He will send you a website where you can confirm the
+structure of each species. Once you are done, I think you will have to
+email him again to get all the results.
+
+For your second issue, you can add the species with or without any
+specified thermochemistry. If you provide none, RMG will make its own
+estimate based on Benson groups. This might be a good enough estimate
+depending on the structure of the molecule If you want to provide your own
+thermo: see documentation here http://reactionmechanismgenerator.
+github.io/RMG-Py/users/rmg/database/thermo.html#thermodatabase about
+creating a thermo library for each of these species.
+
+I hope this was helpful,
+Nathan
+------------------------------
+*From:* Wang Jui Yang [wang.juiyang@kaust.edu.sa]
+*Sent:* Sunday, September 25, 2016 8:56 AM
+*To:* Nathan Wa-Wai Yee
+*Subject:* RMG database compiling help
+
+Hello Nathan,
+
+This is JuiYang Wang (Ray) as a master student studying in KAUST,
+affiliated to combustion research center. I'm trying to develop a biofuel
+mechanism development using RMG for some reactions estimation and mechanism
+development. However, Some file compiled problems has been faced. We have
+kinetic and thermodynamic files of the fuel in Chemkin readable code. But
+after checking the libraries from RMG, they're wildly different and need to
+be compiled to different form. So does RMG hub have that kind of code or
+something else that can regenerate kinetic and thermodynamic files?
+
+Another issue is that I found some new species from experiment and I'd like
+to include them into seed mechanism and set their concentration or mole
+fraction as zero so as to make them be concerned in the core as key
+species. But how can I obtain their NasaPolynomial? Or can they be
+generated automatically by RMG?
+
+Those are my concerns.
+
+Thank you
+
+Regards,
+Jui-Yang, Wang
+
+Master Student
+Clean Combustion Research Center (CCRC)
+King Abdullah University of Science and Technology
+Thuwal, 23955-6900, Saudi Arabia
+Mobile number: +966 570820131
+Email: wang.juiyang@kaust.edu.sa
+
+
+------------------------------
+This message and its contents, including attachments are intended solely
+for the original recipient. If you are not the intended recipient or have
+received this message in error, please notify me immediately and delete
+this message from your computer system. Any unauthorized use or
+distribution is prohibited. Please consider the environment before printing
+this email.
+
+--=20
+
+------------------------------
+This message and its contents, including attachments are intended solely=20
+for the original recipient. If you are not the intended recipient or have=
+=20
+received this message in error, please notify me immediately and delete=20
+this message from your computer system. Any unauthorized use or=20
+distribution is prohibited. Please consider the environment before printing=
+=20
+this email.
+
+--047d7bd8fdfab9494a053d6cf11f
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Microsoft-Exchange-Diagnostics:
+	1;CY4PR06MB2743;9:4eRCjU3zzOOMMckChCIoFore8pxaQ+kf8PJOopNg7OGfgR6OVTa94T1lUF4sSy+YZyy+yoNPHiT8zA4dqP8IT974ceFGze4HeqKyMMm29fFqzLCR8lZubba6tLvhkSslhNoW6YLQQgqkY/BIV5+bDNWXXNXTPIsWoGK/i6DviECk38jSazR3L5fFbl6zSP3ris4p7R6996hq2VqcxcV71A==
+
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8"><d=
+iv dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:georgia,se=
+rif;font-size:small">Dear professor West,</div><div class=3D"gmail_default"=
+ style=3D"font-family:georgia,serif;font-size:small"><br></div><div class=
+=3D"gmail_default" style=3D"font-family:georgia,serif;font-size:small">My n=
+ame is JuiYang Wang (Ray) as a master's student in combustion research cent=
+er, KAUST in Saudi Arabia. A PhD student, Nathan, from MIT kindly advised m=
+e to seek your help for an issue between Chemkin and RMG. The attachment is=
+ the kinetic and thermodynamic files in Chemkin readable file which describ=
+es the fuel I'm now working on and developed by professor Dooley. And I hop=
+e to develop some useful low temperature oxidation mechanisms using RMG. Af=
+ter checking the Libraries of RMG, they have quite different format and it =
+may take a long time for creating adjacency list manually. Therefore, may y=
+ou set a job or let me know what should I provide for it to work easier?&nb=
+sp;</div><div><div class=3D"gmail_signature" data-smartmail=3D"gmail_signat=
+ure"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><d=
+iv><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div><font face=3D"ge=
+orgia, serif" size=3D"2"><br></font></div><div><font face=3D"georgia, serif=
+" size=3D"2">T<div class=3D"gmail_default" style=3D"font-family:georgia,ser=
+if;font-size:small;display:inline">=E2=80=8Bhank you for your help</div></f=
+ont></div><div><font face=3D"georgia, serif" size=3D"2"><div class=3D"gmail=
+_default" style=3D"font-family:georgia,serif;font-size:small;display:inline=
+"><br></div></font></div><div><font face=3D"georgia, serif" size=3D"2"><div=
+ class=3D"gmail_default" style=3D"font-family:georgia,serif;font-size:small=
+;display:inline">Sincerely yours,</div></font></div><div><font face=3D"geor=
+gia, serif" size=3D"2"><div class=3D"gmail_default" style=3D"font-family:ge=
+orgia,serif;font-size:small;display:inline">=E2=80=8B</div></font><span sty=
+le=3D"font-family:georgia,serif">Jui-Yang, Wang</span></div><div><font face=
+=3D"georgia, serif" size=3D"2"><br></font></div></div></div></div></div><sp=
+an style=3D"color:black;font-family:georgia,serif;font-size:small">Master S=
+tudent</span><br><span style=3D"color:black;font-family:georgia,serif;font-=
+size:small">Clean Combustion Research Center (CCRC)</span><br><span style=
+=3D"color:black;font-family:georgia,serif;font-size:small">King Abdullah Un=
+iversity of Science and&nbsp;Technology</span><br><span style=3D"color:blac=
+k;font-family:georgia,serif;font-size:small">Thuwal, 23955-6900, Saudi Arab=
+ia</span><br><span style=3D"color:black;font-family:georgia,serif;font-size=
+:small">Mobile number: &#43;966 570820131</span><div><span style=3D"font-fa=
+mily:georgia,serif">Email: </span><a href=3D"mailto:wang.juiyang@kaust.edu.=
+sa" style=3D"font-family:georgia,serif" target=3D"_blank">wang.juiyang@kaus=
+t.edu.sa</a></div><div><img src=3D"https://docs.google.com/uc?export=3Ddown=
+load&amp;id=3D0B8seMKgWKWlHVF92a1VZaTFNMEk&amp;revid=3D0B8seMKgWKWlHaVlHbUZ=
+ERGhqQVc2WXo2L0x0Y0xvcmlrUXdVPQ"><br></div></div></div></div></div></div></=
+div>
+<br><div class=3D"gmail_quote">---------- Forwarded message ----------<br>F=
+rom: <b class=3D"gmail_sendername">Nathan Wa-Wai Yee</b> <span dir=3D"ltr">=
+&lt;<a href=3D"mailto:nyee@mit.edu">nyee@mit.edu</a>&gt;</span><br>Date: Mo=
+n, Sep 26, 2016 at 6:39 PM<br>Subject: RE: RMG database compiling help<br>T=
+o: Wang Jui Yang &lt;<a href=3D"mailto:wang.juiyang@kaust.edu.sa">wang.juiy=
+ang@kaust.edu.sa</a>&gt;<br><br><br>
+
+
+
+
+<div>
+<div style=3D"direction:ltr;font-family:Tahoma;color:#000000;font-size:10pt=
+">Hi JuiYang,
+<div><br>
+</div>
+<div>For your first problem, the major obstacle is that you must define the=
+ chemical structure of each species in the chemkin file. We have some autom=
+ated tools to help you. You have two options. Option 1 you can do completel=
+y independently, but it might take
+ longer. Option 2 is faster, but you'll have to contact Professor Richard W=
+est at&nbsp;<span style=3D"font-family:tahoma,verdana,sans-serif;font-size:=
+13px;line-height:18px;background-color:rgb(213,217,231)"><a href=3D"mailto:=
+r.west@neu.edu" target=3D"_blank">r.west@neu.edu</a></span><span style=3D"f=
+ont-size:10pt">.&nbsp;</span></div>
+<div><br>
+</div>
+<div>Option 1: We have a script to convert chemkin mechanisms to reaction a=
+nd thermo libraries. I have attached it, but you could also find it under R=
+MG-database/scripts. For this option, you<span style=3D"font-size:10pt">&nb=
+sp;will need to create an RMG dictionary&nbsp;</span><span style=3D"font-si=
+ze:13.3333px">(see
+ attached dictionary.txt for an example)&nbsp;</span><span style=3D"font-si=
+ze:10pt">to input into the the script. Unfortunately, this is somewhat manu=
+ally intensive. To make the RMG dict you again have two options, 1a and 1b.=
+&nbsp;</span></div>
+<div><br>
+</div>
+<div>Option 1a: Use our website tool to manually create each adjacency list=
+&nbsp;<a href=3D"http://rmg.mit.edu/molecule_search" style=3D"font-size:10p=
+t" target=3D"_blank">http://rmg.mit.edu/<wbr>molecule_search</a><span style=
+=3D"font-size:10pt">&nbsp;</span></div>
+<div><br>
+</div>
+<div>Option 1b. Use the script here to create it from an inputted list of s=
+miles.&nbsp;<a href=3D"https://github.com/ReactionMechanismGenerator/Work-I=
+n-Progress_scripts/blob/master/RMG_input/smilesToDictionary.py" style=3D"fo=
+nt-size:10pt" target=3D"_blank">https://github.com/<wbr>ReactionMechanismGe=
+nerator/<wbr>Work-In-Progress_scripts/blob/<wbr>master/RMG_input/<wbr>smile=
+sToDictionary.py</a><span style=3D"font-size:10pt">&nbsp;</span></div>
+<div><span style=3D"font-size:10pt"><br>
+</span></div>
+<div><span style=3D"font-size:10pt">Option 2. Professor Richard West who is=
+ a close collaborator with us has created a tool that will try to guess the=
+ chemical structure from the chemkin file's thermochemistry. You will need =
+to email him to ask him to set up
+ a job to do it. He will send you a website where you can confirm the struc=
+ture of each species. Once you are done, I think you will have to email him=
+ again to get all the results.</span></div>
+<div><span style=3D"font-size:10pt"><br>
+</span></div>
+<div><span style=3D"font-size:10pt">For your second issue, you can add the =
+species with or without any specified thermochemistry. If you provide none,=
+ RMG will make its own estimate based on Benson groups. This might be a goo=
+d enough estimate depending on the
+ structure of the molecule If you want to provide your own thermo: see docu=
+mentation here&nbsp;</span><a href=3D"http://reactionmechanismgenerator.git=
+hub.io/RMG-Py/users/rmg/database/thermo.html#thermodatabase" style=3D"font-=
+size:10pt" target=3D"_blank">http://<wbr>reactionmechanismgenerator.<wbr>gi=
+thub.io/RMG-Py/users/rmg/<wbr>database/thermo.html#<wbr>thermodatabase</a>&=
+nbsp;about
+ creating a thermo library for each of these species.&nbsp;</div>
+<div><br>
+</div>
+<div>I hope this was helpful,</div>
+<div>Nathan</div>
+<div>
+<div style=3D"font-family:Times New Roman;color:#000000;font-size:16px">
+<hr>
+<div style=3D"direction:ltr"><font face=3D"Tahoma" size=3D"2" color=3D"#000=
+000"><b>From:</b> Wang Jui Yang [<a href=3D"mailto:wang.juiyang@kaust.edu.s=
+a" target=3D"_blank">wang.juiyang@kaust.edu.sa</a>]<br>
+<b>Sent:</b> Sunday, September 25, 2016 8:56 AM<br>
+<b>To:</b> Nathan Wa-Wai Yee<br>
+<b>Subject:</b> RMG database compiling help<br>
+</font><br>
+</div>
+<div></div>
+<div><div><div class=3D"h5">
+<div dir=3D"ltr">
+<div style=3D"font-family:georgia,serif;font-size:small">Hello Nathan,</div=
+>
+<div style=3D"font-family:georgia,serif;font-size:small"><br>
+</div>
+<div style=3D"font-family:georgia,serif;font-size:small">This is JuiYang Wa=
+ng (Ray) as a master student studying in KAUST, affiliated to combustion re=
+search center. I'm trying to develop a biofuel mechanism development using =
+RMG for some
+ reactions estimation and mechanism development. However, Some file compile=
+d problems has been faced. We have kinetic and thermodynamic files of the f=
+uel in Chemkin readable code. But after checking the libraries from RMG, th=
+ey're wildly different and need
+ to be compiled to different form. So does RMG hub have that kind of code o=
+r something else that can regenerate kinetic and thermodynamic files?&nbsp;=
+</div>
+<div style=3D"font-family:georgia,serif;font-size:small"><br>
+</div>
+<div style=3D"font-family:georgia,serif;font-size:small">Another issue is t=
+hat I found some new species from experiment and I'd like to include them i=
+nto seed mechanism and set their concentration or mole fraction as zero so =
+as to make
+ them be concerned in the core as key species. But how can I obtain their N=
+asaPolynomial? Or can they be generated automatically by RMG?&nbsp;</div>
+<div style=3D"font-family:georgia,serif;font-size:small"><br>
+</div>
+<div style=3D"font-family:georgia,serif;font-size:small">Those are my conce=
+rns.</div>
+<div style=3D"font-family:georgia,serif;font-size:small"><br>
+</div>
+<div style=3D"font-family:georgia,serif;font-size:small">Thank you &nbsp;</=
+div>
+<div style=3D"font-family:georgia,serif;font-size:small"><br>
+</div>
+<div>
+<div>
+<div dir=3D"ltr">
+<div>
+<div dir=3D"ltr">
+<div>
+<div dir=3D"ltr">
+<div>
+<div dir=3D"ltr">
+<div>
+<div dir=3D"ltr">
+<div>
+<div dir=3D"ltr">
+<div dir=3D"ltr"><font face=3D"georgia, serif" size=3D"2">Regards,</font>
+<div><font face=3D"georgia, serif" size=3D"2">Jui-Yang, Wang</font></div>
+<div><font face=3D"georgia, serif" size=3D"4"><br>
+</font></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span style=3D"color:black;font-family:georgia,serif;font-size:small">Maste=
+r Student</span><br>
+<span style=3D"color:black;font-family:georgia,serif;font-size:small">Clean=
+ Combustion Research Center (CCRC)</span><br>
+<span style=3D"color:black;font-family:georgia,serif;font-size:small">King =
+Abdullah University of Science and&nbsp;Technology</span><br>
+<span style=3D"color:black;font-family:georgia,serif;font-size:small">Thuwa=
+l, 23955-6900, Saudi Arabia</span><br>
+<span style=3D"color:black;font-family:georgia,serif;font-size:small">Mobil=
+e number: &#43;966 570820131</span>
+<div><span style=3D"font-family:georgia,serif">Email: </span><a href=3D"mai=
+lto:wang.juiyang@kaust.edu.sa" style=3D"font-family:georgia,serif" target=
+=3D"_blank">wang.juiyang@kaust.edu.sa</a></div>
+<div><img><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<br>
+</div></div><div>
+<hr>
+</div>
+<font face=3D"Arial" size=3D"1">This message and its contents, including at=
+tachments are intended solely for the original recipient. If you are not th=
+e intended recipient or have received this message in error, please notify =
+me immediately and delete this message
+ from your computer system. Any unauthorized use or distribution is prohibi=
+ted. Please consider the environment before printing this email.</font></di=
+v>
+</div>
+</div>
+</div>
+</div>
+
+</div><br></div>
+
+<br>
+<div><hr></div><font face=3D"Arial" size=3D"1">This message and its content=
+s, including attachments are intended solely for the original recipient. If=
+ you are not the intended recipient or have received this message in error,=
+ please notify me immediately and delete this message from your computer sy=
+stem. Any unauthorized use or distribution is prohibited. Please consider t=
+he environment before printing this email.</font>=
+
+--047d7bd8fdfab9494a053d6cf11f--

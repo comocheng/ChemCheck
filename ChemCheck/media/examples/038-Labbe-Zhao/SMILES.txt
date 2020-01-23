@@ -1,0 +1,3 @@
+CH2	triplet[CH2]
+CH2(S)	singlet[CH2]
+C2H2	C#C
