@@ -12,6 +12,7 @@ install:
   - conda info -a
   - cd ChemCheck
   - conda create -n chemcheck -c conda-forge django\>=2.2.2 ruamel.yaml numpy
+  - y
   - conda activate chemcheck
   - cd ChemCheck
 script:
