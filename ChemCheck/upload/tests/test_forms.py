@@ -1,7 +1,7 @@
 '''This file tests if the forms are valid.'''
 
 from django.test import TestCase
-from upload.forms import *
+from upload.forms import ChemkinUpload
 from unittest import mock
 from django.core.files.uploadedfile import SimpleUploadedFile
 
