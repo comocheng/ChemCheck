@@ -2,15 +2,12 @@ language: python
 python:
   - "3.6"
 install:
-  - ls
   - cd ChemCheck
   - pipenv install
+  - cd ..
   - pipenv shell
   - cd ChemCheck
 script:
   - python manage.py makemigrations
   - python manage.py migrate
   - python manage.py test
-
-
- 
