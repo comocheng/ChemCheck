@@ -1,0 +1,21 @@
+language: python
+python:
+  - "3.6"
+install:
+  - cd ..
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh; fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH=$HOME/miniconda/bin:$PATH
+  # Update conda
+  - conda update --yes conda
+  - conda info -a
+  - cd ChemCheck
+  - conda create -n chemcheck -c conda-forge django\>=2.2.2 ruamel.yaml numpy
+  - conda activate chemcheck
+  - cd ChemCheck
+script:
+  - python manage.py test
+
+
+ 
