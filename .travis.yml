@@ -4,6 +4,8 @@ python:
 install:
   - cd ChemCheck
   - pip install Pipfile
+  - python -VV
+  - pip freeze
 script:
   - python manage.py makemigrations
   - python manage.py migrate
