@@ -3,10 +3,7 @@ python:
   - "3.6"
 install:
   - cd ChemCheck
-  - pipenv install
-  - cd ..
-  - pipenv shell
-  - cd ChemCheck
+  - pip install Pipfile
 script:
   - python manage.py makemigrations
   - python manage.py migrate
