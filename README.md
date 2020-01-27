@@ -6,6 +6,8 @@ report error messages and codes around the error line when conversion fails. In 
 
 Next Step: we will test different error files reported in Cantera users group to provide more error diagnosis.
 
+### Initital setup
+
 Initial setup, installing dependencies using conda:
 
     $ conda create -n chemcheck -c conda-forge django\>=2.2.2 ruamel.yaml numpy
@@ -18,13 +20,22 @@ Initial setup, installing dependencies using `pipenv`:
     $ pipenv shell
     $ cd ChemCheck
 
+Using pip:
+
+    $ pip install -r requirements.txt
+    $ cd ChemCheck
+
+### Updates
+
 First run or every time someone changes the models:
 
-    $ python3 manage.py makemigrations
-    $ python3 manage.py migrate
+    $ python manage.py makemigrations
+    $ python manage.py migrate
+
+### Running
 
 To launch the server:
 
-    $ python3 manage.py runserver
+    $ python manage.py runserver
 
 then point a browser at http://127.0.0.1:8000/upload/
