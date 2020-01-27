@@ -2,11 +2,11 @@ language: python
 python:
   - "3.6"
 install:
-  - cd ChemCheck
-  - pip install Pipfile
+  - pip install -r Pipfile
   - python -VV
   - pip freeze
 script:
+  - cd ChemCheck
   - python manage.py makemigrations
   - python manage.py migrate
   - python manage.py test
