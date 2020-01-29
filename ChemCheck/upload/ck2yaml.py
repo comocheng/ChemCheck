@@ -1717,7 +1717,6 @@ class Parser:
                 else:
                     advance = True
 
-        self.check_duplicate_reactions()
 
         for index, reaction in enumerate(self.reactions):
             reaction.index = index + 1
