@@ -36,7 +36,7 @@ def ck2yaml(request, pk):
 
     from .ck2yaml import Parser
     import traceback
-    import logging
+  
 
 
     input_file = mechanism.ck_mechanism_file.path
@@ -48,6 +48,7 @@ def ck2yaml(request, pk):
     error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
     open(error_filename, "w").close() # wipes the file it already existed.
     parser = Parser()
+    suggestion = ''
 
     try:
         parser.convert_mech(input_file, 
@@ -67,7 +68,9 @@ def ck2yaml(request, pk):
         conversion_log += str(e)                      
         error_message = traceback.format_exc()
         conversion_log += error_message
-
+        syn_error = re.search('Section starts with unrecognized keyword', str(e))
+        ec_error = re.search("Error parsing elemental composition for "
+                             "species (?P<name>...)", str(e))
         match = re.search('Unable to parse .* near line (\d+):', content)
         if match:
             conversion_log += '\n\n'
@@ -78,6 +81,13 @@ def ck2yaml(request, pk):
             context = 4
             excerpt = lines[ max(line_number-context,0):min(line_number+context, len(lines)) ]
             conversion_log += '\n'.join(excerpt)
+            file_name = os.path.split(error_path)[1]
+            if syn_error:
+                suggestion += 'Suggestion: Please replace or delete the first word in {0} line {1}'.format(file_name, line_number)
+            elif ec_error:
+                species = str(e).split()[-1]
+                suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, file_name)
+                
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
@@ -89,6 +99,7 @@ def ck2yaml(request, pk):
     return render(request, 'ck2yaml.html', {
        'mech': mechanism,
        'conversion_log': conversion_log,
+       'suggestion': suggestion
     })
 
     
