@@ -45,8 +45,6 @@ def ck2yaml(request, pk):
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
     phase_name = None # will default to 'gas'
     out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
-    #error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
-    #open(error_filename, 'w').close
     error_filename = os.path.join(MEDIA_ROOT, 'error.txt')
     with open(error_filename, 'w') as err_content:
         err_content.write('This is the error generated from Mechanism{0}\n'.format(mechanism.id))
