@@ -1922,12 +1922,12 @@ class Parser:
                      quiet=False, permissive=None):
 
         parser = Parser()
-        f = os.path.split(input_file)[0]
-        p = os.path.join(f, "error.txt")
+        from canteradebugger.settings import MEDIA_ROOT
+        f = os.path.join(MEDIA_ROOT, 'error.txt')
         if quiet:
             logging.basicConfig(level=logging.ERROR)
         else:
-            logging.basicConfig(filename=p, level=logging.INFO)
+            logging.basicConfig(filename=f, filemode='r+', level=logging.INFO)
 
         if permissive is not None:
             parser.warning_as_error = not permissive

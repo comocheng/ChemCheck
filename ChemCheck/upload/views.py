@@ -36,8 +36,8 @@ def ck2yaml(request, pk):
 
     from .ck2yaml import Parser
     import traceback
-  
-
+    import tempfile
+    from canteradebugger.settings import MEDIA_ROOT
 
     input_file = mechanism.ck_mechanism_file.path
     thermo_file =  mechanism.ck_thermo_file.path if mechanism.ck_thermo_file else None
@@ -45,8 +45,11 @@ def ck2yaml(request, pk):
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
     phase_name = None # will default to 'gas'
     out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
-    error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
-    open(error_filename, "w").close() # wipes the file it already existed.
+    #error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
+    #open(error_filename, 'w').close
+    error_filename = os.path.join(MEDIA_ROOT, 'error.txt')
+    with open(error_filename, 'w') as err_content:
+        err_content.write('This is the error generated from Mechanism{0}\n'.format(mechanism.id))
     parser = Parser()
     suggestion = ''
 
@@ -81,12 +84,12 @@ def ck2yaml(request, pk):
             context = 4
             excerpt = lines[ max(line_number-context,0):min(line_number+context, len(lines)) ]
             conversion_log += '\n'.join(excerpt)
-            file_name = os.path.split(error_path)[1]
+            error_file_name = os.path.split(error_path)[1]
             if syn_error:
-                suggestion += 'Suggestion: Please replace or delete the first word in {0} line {1}'.format(file_name, line_number)
+                suggestion += 'Suggestion: Please replace or delete the first word in {0} line {1}'.format(error_file_name, line_number)
             elif ec_error:
                 species = str(e).split()[-1]
-                suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, file_name)
+                suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
                 
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
