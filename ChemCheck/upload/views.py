@@ -9,7 +9,7 @@ import re
 from django.core.files.base import File
 from django.urls import reverse_lazy
 from .ck2yaml import strip_nonascii
-
+import linecache
 
 # Create your views here.
 
@@ -72,23 +72,71 @@ def ck2yaml(request, pk):
         syn_error = re.search('Section starts with unrecognized keyword', str(e))
         ec_error = re.search("Error parsing elemental composition for "
                              "species (?P<name>...)", str(e))
+        missing_end_number = re.search('Error while reading thermo entry starting on line (\d+)', conversion_log)
+        value_error = re.search("ValueError: could not convert string to float: (?P<name>...)", conversion_log)
         match = re.search('Unable to parse .* near line (\d+):', content)
         if match:
             conversion_log += '\n\n'
             line_number = int(match.group(1))
             error_path = match.group(0).split("'")[1]
-            with open(error_path) as ck:
+            with open(error_path, 'r', errors='ignore') as ck:
                 lines = ck.readlines()
             context = 4
             excerpt = lines[ max(line_number-context,0):min(line_number+context, len(lines)) ]
             conversion_log += '\n'.join(excerpt)
             error_file_name = os.path.split(error_path)[1]
             if syn_error:
-                suggestion += 'Suggestion: Please replace or delete the first word in {0} line {1}'.format(error_file_name, line_number)
+                suggestion += 'Suggestion: Please replace or delete any special character or redundant word in {0} line {1}'.format(error_file_name, line_number)
+            
+            elif missing_end_number:
+                with open(error_path, 'r', errors='ignore'):
+                    line_num = int(missing_end_number.group(1))
+                    err_line = linecache.getline(error_path, line_num)
+                    position = int(err_line.rfind('1', 74, 84))
+                    if position == 79:
+                        line_num += 1
+                        err_line = linecache.getline(error_path, line_num)
+                        position = int(err_line.rfind('2', 74, 84))
+                        if position == 79:
+                            line_num += 1
+                            err_line = linecache.getline(error_path, line_num)
+                            position = int(err_line.rfind('3', 74, 84))
+                            if position == 79:
+                                line_num += 1
+                                err_line = linecache.getline(error_path, line_num)
+                                position = int(err_line.rfind('4', 74, 84))
+                                if position == 79:
+                                    suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                                elif position == -1:
+                                    suggestion += 'Suggestion: You are missing the index number 4 at the end of the line {}!'.format(line_num)
+                                elif position != 79 and position != -1:
+                                    suggestion += 'Suggestion: The index number 4 at the end of line {} is not in the same column with other lines'.format(line_num)
+                                else:
+                                    suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                            elif position == -1:
+                                suggestion += 'Suggestion: You are missing the index number 3 at the end of the line {}!'.format(line_num)
+                            elif position != 79 and position != -1:
+                                suggestion += 'Suggestion: The index number 3 at the end of line {} is not in the same column with other lines'.format(line_num)
+                            else:
+                                suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                        elif position == -1:
+                            suggestion += 'Suggestion: You are missing the index number 2 at the end of the line {}!'.format(line_num)
+                        elif position != 79 and position != -1:
+                            suggestion += 'Suggestion: The index number 2 at the end of line {} is not in the same column with other lines'.format(line_num)
+                        else:
+                            suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                    elif position == -1:
+                        suggestion += 'Suggestion: You are missing the index number 1 at the end of the line {}!'.format(line_num)
+                    elif position != 79 and position != -1:
+                        suggestion += 'Suggestion: The index number 1 at the end of line {} is not in the same column with other lines'.format(line_num)
+                    else:
+                        suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
             elif ec_error:
                 species = str(e).split()[-1]
                 suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
-                
+            elif value_error:
+                suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))
+            
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
