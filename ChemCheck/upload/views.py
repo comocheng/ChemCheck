@@ -74,6 +74,7 @@ def ck2yaml(request, pk):
                              "species (?P<name>...)", str(e))
         missing_end_number = re.search('Error while reading thermo entry starting on line (\d+)', conversion_log)
         value_error = re.search("ValueError: could not convert string to float: (?P<name>...)", conversion_log)
+        transport_error = re.search("No transport data for species (?P<name>.....)", str(content))
         match = re.search('Unable to parse .* near line (\d+):', content)
         if match:
             conversion_log += '\n\n'
@@ -106,37 +107,42 @@ def ck2yaml(request, pk):
                                 err_line = linecache.getline(error_path, line_num)
                                 position = int(err_line.rfind('4', 74, 84))
                                 if position == 79:
-                                    suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                                    if ec_error:
+                                        species = str(e).split()[-1]
+                                        suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
+                                    #suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
                                 elif position == -1:
                                     suggestion += 'Suggestion: You are missing the index number 4 at the end of the line {}!'.format(line_num)
                                 elif position != 79 and position != -1:
                                     suggestion += 'Suggestion: The index number 4 at the end of line {} is not in the same column with other lines'.format(line_num)
-                                else:
-                                    suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                                # else:
+                                #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
                             elif position == -1:
                                 suggestion += 'Suggestion: You are missing the index number 3 at the end of the line {}!'.format(line_num)
                             elif position != 79 and position != -1:
                                 suggestion += 'Suggestion: The index number 3 at the end of line {} is not in the same column with other lines'.format(line_num)
-                            else:
-                                suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                            # else:
+                            #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
                         elif position == -1:
                             suggestion += 'Suggestion: You are missing the index number 2 at the end of the line {}!'.format(line_num)
                         elif position != 79 and position != -1:
                             suggestion += 'Suggestion: The index number 2 at the end of line {} is not in the same column with other lines'.format(line_num)
-                        else:
-                            suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                        # else:
+                        #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
                     elif position == -1:
                         suggestion += 'Suggestion: You are missing the index number 1 at the end of the line {}!'.format(line_num)
                     elif position != 79 and position != -1:
                         suggestion += 'Suggestion: The index number 1 at the end of line {} is not in the same column with other lines'.format(line_num)
-                    else:
-                        suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                    # else:
+                    #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
             elif ec_error:
                 species = str(e).split()[-1]
                 suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
             elif value_error:
                 suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))
-            
+            elif transport_error:
+                species = str(transport_error.group(0))
+                suggestion += 'Suggestion: You can manually add the transport data for species {} \nor you can delete the transport file and do the conversion again.'.format(species)
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
