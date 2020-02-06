@@ -1717,7 +1717,7 @@ class Parser:
                 else:
                     advance = True
 
-
+        #self.check_duplicate_reactions()
         for index, reaction in enumerate(self.reactions):
             reaction.index = index + 1
 
@@ -1922,12 +1922,12 @@ class Parser:
                      quiet=False, permissive=None):
 
         parser = Parser()
-        from canteradebugger.settings import MEDIA_ROOT
-        f = os.path.join(MEDIA_ROOT, 'error.txt')
+        f = os.path.split(input_file)[0]
+        p = os.path.join(f, "error.txt")
         if quiet:
             logging.basicConfig(level=logging.ERROR)
         else:
-            logging.basicConfig(filename=f, filemode='r+', level=logging.INFO)
+            logging.basicConfig(force=True, filename=p, level=logging.INFO)
 
         if permissive is not None:
             parser.warning_as_error = not permissive

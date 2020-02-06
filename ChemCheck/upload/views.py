@@ -45,7 +45,7 @@ def ck2yaml(request, pk):
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
     phase_name = None # will default to 'gas'
     out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
-    error_filename = os.path.join(MEDIA_ROOT, 'error.txt')
+    error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
     with open(error_filename, 'w') as err_content:
         err_content.write('This is the error generated from Mechanism{0}\n'.format(mechanism.id))
     parser = Parser()
@@ -62,7 +62,6 @@ def ck2yaml(request, pk):
                         permissive = True,
                         )
     except Exception as e:
-        
         with open(error_filename, "r") as err:
             content = err.read()
         conversion_log += str(content)
@@ -74,7 +73,9 @@ def ck2yaml(request, pk):
                              "species (?P<name>...)", str(e))
         missing_end_number = re.search('Error while reading thermo entry starting on line (\d+)', conversion_log)
         value_error = re.search("ValueError: could not convert string to float: (?P<name>...)", conversion_log)
-        transport_error = re.search("No transport data for species (?P<name>.....)", str(content))
+        transport_error = re.search("No transport data for species ", str(e))
+        duplicate_reaction_type = re.search('Reaction entry contains parameters for more than one reaction type', str(e))
+        
         match = re.search('Unable to parse .* near line (\d+):', content)
         if match:
             conversion_log += '\n\n'
@@ -139,10 +140,11 @@ def ck2yaml(request, pk):
                 species = str(e).split()[-1]
                 suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
             elif value_error:
-                suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))
-            elif transport_error:
-                species = str(transport_error.group(0))
-                suggestion += 'Suggestion: You can manually add the transport data for species {} \nor you can delete the transport file and do the conversion again.'.format(species)
+                suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))            
+            elif duplicate_reaction_type:
+                suggestion += 'Suggestion: You may have two set of parameters for one reaction \n Try to delete the duplicate parameters and convert again .'
+        elif transport_error:
+            suggestion += 'Suggestion: You can manually add the transport data for that species \nor you can delete the transport file and do the conversion again.'
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
