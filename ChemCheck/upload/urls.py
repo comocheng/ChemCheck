@@ -13,4 +13,5 @@ urlpatterns = [
     path('mechanism/<int:pk>/delete_transport', views.MechanismtransportDeleteView.as_view(), name='delete_file_transport'),
     path('mechanism/<int:pk>/delete_surface', views.MechanismsurfaceDeleteView.as_view(), name='delete_file_surface'),
     path('mechanism/<int:pk>/update', views.MechanismUpdateView.as_view(), name='update_file_transport'),
+    path('mechanism/<int:pk>/chemcheck', views.chemcheck, name='chemcheck'),
 ]

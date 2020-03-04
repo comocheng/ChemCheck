@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for species in species_name %}
+    <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found these species with polynomial discontinuity!</font></p>
+    <ul>
+        <li>
+            <img src="{{ species }}">
+        </li>
+    </ul>
+{% empty %}
+    <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;">Congratulations! No species with polynomial discontinuity!</font></p>
+{% endfor %}
+{% endblock %}

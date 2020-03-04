@@ -14,13 +14,16 @@
 {% if mech.ct_mechanism_file %}
 <br>
 Cantera YAML file: 
-<a href="/media/uploads/{{ mech.id }}/cantera.txt">
+<a href="/media/uploads/{{ mech.id }}/cantera.yaml">
     <button type="button" class="btn btn-primary btn-sm">View</button>
 </a>
 {% load static %}
-<a href="/media/uploads/{{ mech.id }}/cantera.txt" download>
+<a href="/media/uploads/{{ mech.id }}/cantera.yaml" download>
     <link rel="stylesheet" href="{% static 'CSS/downloadbutton.css' %}" type="text/css">
     <button class="btn"> Download</button>
+</a>
+<a href="/mechanism/{{ mech.id }}/chemcheck">
+    <button type="button" class="btn btn-primary btn-sm">Check Chemistry</button>
 </a>
 {% endif %}
 
