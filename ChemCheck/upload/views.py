@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, DetailView, View
 from .forms import ChemkinUpload
 from .models import Mechanism
+from .models import ChemError, cp_calculate, s_calculate, h_calculate
 from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
 import os
@@ -10,6 +11,7 @@ from django.core.files.base import File
 from django.urls import reverse_lazy
 from .ck2yaml import strip_nonascii
 import linecache
+from canteradebugger.settings import MEDIA_ROOT
 
 # Create your views here.
 
@@ -43,8 +45,8 @@ def ck2yaml(request, pk):
     thermo_file =  mechanism.ck_thermo_file.path if mechanism.ck_thermo_file else None
     transport_file = mechanism.ck_transport_file.path if mechanism.ck_transport_file else None
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
-    phase_name = None # will default to 'gas'
-    out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
+    phase_name = 'gas' # will default to 'gas'
+    out_name = os.path.join(os.path.split(input_file)[0], 'cantera.yaml')
     error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
     with open(error_filename, 'w') as err_content:
         err_content.write('This is the error generated from Mechanism{0}\n'.format(mechanism.id))
@@ -296,3 +298,11 @@ class MechanismUpdateView(MechanismObjectMixin, View):
             form.save()
             url = reverse_lazy('mechanism-detail', args=[obj.pk])
             return HttpResponseRedirect(url)
+def chemcheck(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+    name = 'cantera'
+    species_name = ChemError(path, name).check_continuity()
+    return render(request, 'chemcheck.html', {
+        'species_name':species_name
+    })
