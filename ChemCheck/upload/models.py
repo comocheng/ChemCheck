@@ -6,6 +6,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import linecache
 
 
 # Create your models here.
@@ -112,6 +113,8 @@ def s_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
             return s_low
         else:
             return s_low, s_high
+            
+
 
 class ChemError:
     def __init__(self, path, name):
@@ -178,3 +181,114 @@ class ChemError:
                 #     print(species['name'])
                 # else:
                 #     print(species['name'], T_continuouse)
+    def check_negative_A_factor(self):
+        arrhenius_reactions = []
+        with open(self.path, 'r') as f:
+            chem_data = yaml.load(f, Loader=yaml.FullLoader)
+        reactions = chem_data['reactions']
+        for r in reactions:
+            if ('type', 'pressure-dependent-Arrhenius') in r.items():
+                arrhenius_reactions.append(r)
+        return arrhenius_reactions       
+
+             
+def err_line_without_comment(path, line_num):
+    err_line = linecache.getline(path, line_num)
+    if len(err_line) != 0:
+        if err_line[0] == '!' or err_line[-2] == '!':
+            line_num += 1
+            err_line = linecache.getline(path, line_num)
+            return err_line_without_comment(path, line_num)
+        else:
+            return err_line, line_num
+    else:
+        return err_line
+
+def list_of_rate_constants_with_same_pressure(rate_constants, index, same_pressure_list):
+    if index < len(rate_constants) - 1:
+        if float(rate_constants[index]['P'].split()[0]) == float(rate_constants[index + 1]['P'].split()[0]):
+            same_pressure_list.append(rate_constants[index])
+            index += 1
+            max_index = len(rate_constants) - 1
+            if index == max_index:            
+                same_pressure_list.append(rate_constants[index])
+                return same_pressure_list
+            else:
+                return list_of_rate_constants_with_same_pressure(rate_constants, index, same_pressure_list)
+        else:
+            same_pressure_list.append(rate_constants[index])
+            return same_pressure_list
+    else:
+        same_pressure_list.append(rate_constants[index])
+        return same_pressure_list
+
+def bigger_list(rate_constants, same_p_list, big_list, sum_of_selected_constants):
+    big_list.append(same_p_list)
+    sum_of_selected_constants += len(same_p_list)
+    rest_of_constants  = len(rate_constants) - sum_of_selected_constants
+    if rest_of_constants > 0:
+        same_p_list = list_of_rate_constants_with_same_pressure(rate_constants, sum_of_selected_constants, [])
+        return bigger_list(rate_constants, same_p_list, big_list, sum_of_selected_constants)
+    else:
+        return big_list
+
+class CheckNegativeA:
+    def __init__(self, path):
+        self.path = path
+        
+    def new_arrhenius_dict(self):
+            a = {}
+            b= {}
+            #c = {}
+            arrhenius_reactions = []
+            #error_reactions = {}
+            with open(self.path, 'r') as f:
+                chem_data = yaml.load(f, Loader=yaml.FullLoader)
+            reactions = chem_data['reactions']
+            for r in reactions:
+                if ('type', 'pressure-dependent-Arrhenius') in r.items():
+                    arrhenius_reactions.append(r)
+            #return arrhenius_reactions
+            for reaction in arrhenius_reactions:
+                rate_constants = reaction['rate-constants']
+                reaction_equation = reaction['equation']
+                b[reaction_equation] = rate_constants
+            for i, k in b.items():
+                same_p_list = list_of_rate_constants_with_same_pressure(k, 0, [])
+                new_list_of_reaction_constants = bigger_list(k, same_p_list, [], 0)
+                a[i] = new_list_of_reaction_constants
+            return a
+
+    def check_negative_A_factor(self, p):
+        error_reactions = {}
+        for equation, value in p.items():
+            for parameter_list in value:
+                if len(parameter_list) == 1:
+                    if parameter_list[0]['A'] <= 0:
+                        if equation not in error_reactions.keys():
+                            error_reactions[equation] = parameter_list
+                        else:
+                            error_reactions[equation].append(parameter_list)
+                    else:
+                        pass
+        return error_reactions
+
+    def check_sum_of_k(self, p, t):
+        dict = {}
+        for equation, value in p.items():
+            dict[equation] = []
+            b = []
+            for parameter_list in value:
+                if len(parameter_list) != 1:
+                    for rate_parameter in parameter_list:
+                        rate_constant = rate_parameter['A'] * (t ** rate_parameter['b']) * math.exp(rate_parameter['Ea'] / (8314.46261815324 * t))
+                        b.append(rate_constant)
+                    c = sum(b)
+                    if c <= 0:
+                        dict[equation].append(parameter_list)
+        error_equation_list = {}
+        
+        for key, value in dict.items():
+            if dict[key] != []:
+                error_equation_list[key] = value
+        return error_equation_list

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, DetailView, View
 from .forms import ChemkinUpload
 from .models import Mechanism
-from .models import ChemError, cp_calculate, s_calculate, h_calculate
+from .models import ChemError, CheckNegativeA, cp_calculate, s_calculate, h_calculate, err_line_without_comment
 from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
 import os
@@ -95,7 +95,7 @@ def ck2yaml(request, pk):
             elif missing_end_number:
                 with open(error_path, 'r', errors='ignore'):
                     line_num = int(missing_end_number.group(1))
-                    err_line = linecache.getline(error_path, line_num)
+                    err_line, line_num = err_line_without_comment(error_path, line_num)
                     position = int(err_line.rfind('1', 74, 84))
                     if position == 79:
                         line_num += 1
@@ -298,6 +298,7 @@ class MechanismUpdateView(MechanismObjectMixin, View):
             form.save()
             url = reverse_lazy('mechanism-detail', args=[obj.pk])
             return HttpResponseRedirect(url)
+
 def chemcheck(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
@@ -305,4 +306,25 @@ def chemcheck(request, pk):
     species_name = ChemError(path, name).check_continuity()
     return render(request, 'chemcheck.html', {
         'species_name':species_name
+    })
+
+def check_negative_A(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+    new_list_arrhenius = CheckNegativeA(path).new_arrhenius_dict()
+    negative_A_reactions = CheckNegativeA(path).check_negative_A_factor(new_list_arrhenius)
+    # k_sum_error_200 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 200)
+    # k_sum_error_500 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 500)
+    # k_sum_error_1000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 1000)
+    # k_sum_error_2000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 2000)
+    # k_sum_error_5000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 5000)
+    # k_sum_error_10000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 10000)
+    sum_k_error_dict = {}
+    T = [200, 500, 1000, 2000, 5000, 10000]
+    for t in T:
+        k_sum_error = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, t)
+        sum_k_error_dict['{} K'.format(t)] = k_sum_error
+    return render(request, 'negative_A.html',{
+        'negative_A_reactions':negative_A_reactions,
+        'sum_k_error_dict':sum_k_error_dict
     })

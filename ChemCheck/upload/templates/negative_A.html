@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for reaction in negative_A_reactions %}
+    <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found reactions with negative A factor!</font></p>
+    <ul>
+        <li>
+            {{ reaction }}
+        </li>
+    </ul>
+{% empty %}
+    <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No species with negative A factor!</font></p>
+{% endfor %}
+
+{% for T, k in sum_k_error_dict.items %}
+{% if k %}
+    <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found reactions with negative sum of k at {{ T }}!</font></p>
+    <ul>
+        <li>
+            {{ T }}: {{k}}
+        </li>
+    </ul>
+{% else %}
+    <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No species with negative sum of k at {{ T }}!</font></p>
+{% endif %}
+{% endfor %}
+
+{% endblock %}
