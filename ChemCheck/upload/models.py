@@ -277,9 +277,9 @@ class CheckNegativeA:
         dict = {}
         for equation, value in p.items():
             dict[equation] = []
-            b = []
             for parameter_list in value:
                 if len(parameter_list) != 1:
+                    b = []
                     for rate_parameter in parameter_list:
                         rate_constant = rate_parameter['A'] * (t ** rate_parameter['b']) * math.exp(rate_parameter['Ea'] / (8314.46261815324 * t))
                         b.append(rate_constant)
