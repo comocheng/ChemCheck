@@ -15,11 +15,24 @@
 {% for T, k in sum_k_error_dict.items %}
 {% if k %}
     <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found reactions with negative sum of k at {{ T }}!</font></p>
+{% for eqn, parameter in k.items %}
     <ul>
         <li>
-            {{ T }}: {{k}}
+            {{ eqn }}:
+            {% for same_p_list in parameter %}
+            <ul>
+                <li>
+                    {% for parameter_list in same_p_list %}
+                    <div>
+                    {{ parameter_list }}
+                    </div>
+                    {% endfor %}
+                </li>               
+            </ul>
+            {% endfor %}
         </li>
     </ul>
+{% endfor %}
 {% else %}
     <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No species with negative sum of k at {{ T }}!</font></p>
 {% endif %}
