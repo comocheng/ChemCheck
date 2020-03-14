@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, DetailView, View
 from .forms import ChemkinUpload
 from .models import Mechanism
-from .models import ChemError, CheckNegativeA, cp_calculate, s_calculate, h_calculate, err_line_without_comment
+from .chemcheck import ChemError, CheckNegativeA, err_line_without_comment
 from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
 import os
@@ -313,12 +313,6 @@ def check_negative_A(request, pk):
     path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
     new_list_arrhenius = CheckNegativeA(path).new_arrhenius_dict()
     negative_A_reactions = CheckNegativeA(path).check_negative_A_factor(new_list_arrhenius)
-    # k_sum_error_200 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 200)
-    # k_sum_error_500 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 500)
-    # k_sum_error_1000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 1000)
-    # k_sum_error_2000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 2000)
-    # k_sum_error_5000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 5000)
-    # k_sum_error_10000 = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, 10000)
     sum_k_error_dict = {}
     T = [200, 500, 1000, 2000, 5000, 10000]
     for t in T:
