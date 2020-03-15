@@ -117,17 +117,7 @@ class ChemError:
                 #     print(species['name'])
                 # else:
                 #     print(species['name'], T_continuouse)
-    def check_negative_A_factor(self):
-        arrhenius_reactions = []
-        with open(self.path, 'r') as f:
-            chem_data = yaml.load(f, Loader=yaml.FullLoader)
-        reactions = chem_data['reactions']
-        for r in reactions:
-            if ('type', 'pressure-dependent-Arrhenius') in r.items():
-                arrhenius_reactions.append(r)
-        return arrhenius_reactions       
 
-             
 def err_line_without_comment(path, line_num):
     err_line = linecache.getline(path, line_num)
     if len(err_line) != 0:
@@ -171,33 +161,30 @@ def bigger_list(rate_constants, same_p_list, big_list, sum_of_selected_constants
 class CheckNegativeA:
     def __init__(self, path):
         self.path = path
+        with open(self.path, 'r') as f:
+            self.chem_data = yaml.load(f, Loader=yaml.FullLoader)
         
     def new_arrhenius_dict(self):
-            a = {}
-            b= {}
-            #c = {}
+            new_arrhenius_dict = {}
+            cons_list_of_1_rxn = {}
             arrhenius_reactions = []
-            #error_reactions = {}
-            with open(self.path, 'r') as f:
-                chem_data = yaml.load(f, Loader=yaml.FullLoader)
-            reactions = chem_data['reactions']
+            reactions = self.chem_data['reactions']
             for r in reactions:
                 if ('type', 'pressure-dependent-Arrhenius') in r.items():
                     arrhenius_reactions.append(r)
-            #return arrhenius_reactions
             for reaction in arrhenius_reactions:
                 rate_constants = reaction['rate-constants']
                 reaction_equation = reaction['equation']
-                b[reaction_equation] = rate_constants
-            for i, k in b.items():
+                cons_list_of_1_rxn[reaction_equation] = rate_constants
+            for i, k in cons_list_of_1_rxn.items():
                 same_p_list = list_of_rate_constants_with_same_pressure(k, 0, [])
                 new_list_of_reaction_constants = bigger_list(k, same_p_list, [], 0)
-                a[i] = new_list_of_reaction_constants
-            return a
+                new_arrhenius_dict[i] = new_list_of_reaction_constants
+            return new_arrhenius_dict
 
-    def check_negative_A_factor(self, p):
+    def check_negative_A_factor(self, new_arrhenius_dict):
         error_reactions = {}
-        for equation, value in p.items():
+        for equation, value in new_arrhenius_dict.items():
             for parameter_list in value:
                 if len(parameter_list) == 1:
                     if parameter_list[0]['A'] <= 0:
@@ -209,22 +196,22 @@ class CheckNegativeA:
                         pass
         return error_reactions
 
-    def check_sum_of_k(self, p, t):
-        dict = {}
-        for equation, value in p.items():
-            dict[equation] = []
+    def check_sum_of_k(self, new_arrhenius_dict, t):
+        error_rxn_dict = {}
+        for equation, value in new_arrhenius_dict.items():
+            error_rxn_dict[equation] = []
             for parameter_list in value:
                 if len(parameter_list) != 1:
-                    b = []
+                    k_list = []
                     for rate_parameter in parameter_list:
                         rate_constant = rate_parameter['A'] * (t ** rate_parameter['b']) * math.exp(rate_parameter['Ea'] / (1.985877534 * t))
-                        b.append(rate_constant)
-                    c = sum(b)
-                    if c <= 0:
-                        dict[equation].append(parameter_list)
+                        k_list.append(rate_constant)
+                    sum_of_k = sum(k_list)
+                    if sum_of_k <= 0:
+                        error_rxn_dict[equation].append(parameter_list)
         error_equation_list = {}
         
-        for key, value in dict.items():
-            if dict[key] != []:
+        for key, value in error_rxn_dict.items():
+            if error_rxn_dict[key] != []:
                 error_equation_list[key] = value
         return error_equation_list
