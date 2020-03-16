@@ -308,17 +308,35 @@ def chemcheck(request, pk):
         'species_name':species_name
     })
 
-def check_negative_A(request, pk):
+def check_pdep_negative_A(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
-    new_list_arrhenius = CheckNegativeA(path).new_arrhenius_dict()
-    negative_A_reactions = CheckNegativeA(path).check_negative_A_factor(new_list_arrhenius)
-    sum_k_error_dict = {}
+    new_list_pdep = CheckNegativeA(path).new_arrhenius_dict()
+    negative_A_reactions = CheckNegativeA(path).check_negative_A_factor(new_list_pdep)
+    arr_sum_error_dict = {}
     T = [200, 500, 1000, 2000, 5000, 10000]
     for t in T:
-        k_sum_error = CheckNegativeA(path).check_sum_of_k(new_list_arrhenius, t)
-        sum_k_error_dict['{} K'.format(t)] = k_sum_error
-    return render(request, 'negative_A.html',{
+        arr_sum_error = CheckNegativeA(path).check_sum_of_k(new_list_pdep, t)
+        arr_sum_error_dict['{} K'.format(t)] = arr_sum_error
+    return render(request, 'pdep_negative_A.html',{
         'negative_A_reactions':negative_A_reactions,
-        'sum_k_error_dict':sum_k_error_dict
+        'arr_sum_error_dict':arr_sum_error_dict,
+    })
+
+def check_negative_dup_rxns_negative_A(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+    duplicate_reactions = CheckNegativeA(path).duplicate_reactions()
+    pdep_duplicate_reactions = CheckNegativeA(path).duplicate_reactions_multi_P()
+    dup_rxns_err_dict = {}
+    pdep_dup_err_dict = {}
+    T = [200, 500, 1000, 2000, 5000, 10000]
+    for t in T:
+        duplicate_reactions_err = CheckNegativeA(path).check_sum_of_k(duplicate_reactions, t)
+        pdep_duplicate_reactions_err = CheckNegativeA(path).check_sum_of_k(pdep_duplicate_reactions, t)
+        dup_rxns_err_dict['{} K'.format(t)] = duplicate_reactions_err
+        pdep_dup_err_dict['{} K'.format(t)] = pdep_duplicate_reactions_err
+    return render(request, 'dup_negative_A.html', {
+        'dup_rxns_err_dict':dup_rxns_err_dict,
+        'pdep_dup_err_dict':pdep_dup_err_dict
     })

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for T, k in dup_rxns_err_dict.items %}
+    {% if k %}
+        <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found duplicate reactions with negative sum of k at {{ T }}!</font></p>
+        {% for eqn, parameter in k.items %}
+        <ul>
+            <li>
+                {{ eqn }}:
+                {% for same_p_list in parameter %}
+                <ul>
+                    <li>
+                        {% for parameter_list in same_p_list %}
+                        <div>
+                        {{ parameter_list }}
+                        </div>
+                        {% endfor %}
+                    </li>               
+                </ul>
+                {% endfor %}
+            </li>
+        </ul>
+        {% endfor %}
+    {% else %}
+        <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No duplicate reactions with negative sum of k at {{ T }}!</font></p>
+    {% endif %}
+
+{% endfor %}
+{% for T, k in pdep_dup_err_dict.items %}
+    {% if k %}
+        <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found pressure dependent duplicate reactions with negative sum of k at {{ T }}!</font></p>
+        {% for eqn, parameter in k.items %}
+        <ul>
+            <li>
+                {{ eqn }}:
+                {% for same_p_list in parameter %}
+                <ul>
+                    <li>
+                        {% for parameter_list in same_p_list %}
+                        <div>
+                        {{ parameter_list }}
+                        </div>
+                        {% endfor %}
+                    </li>               
+                </ul>
+                {% endfor %}
+            </li>
+        </ul>
+        {% endfor %}
+    {% else %}
+        <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No pressure dependent duplicate reactions with negative sum of k at {{ T }}!</font></p>
+    {% endif %}
+
+{% endfor %}
+{% endblock %}

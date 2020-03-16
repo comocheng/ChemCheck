@@ -15,18 +15,20 @@
 <br>
 Cantera YAML file: 
 <a href="/media/uploads/{{ mech.id }}/cantera.yaml">
-    <button type="button" class="btn btn-primary btn-sm">View</button>
+    <button type="button" >View</button>
 </a>
 {% load static %}
 <a href="/media/uploads/{{ mech.id }}/cantera.yaml" download>
-    <link rel="stylesheet" href="{% static 'CSS/downloadbutton.css' %}" type="text/css">
-    <button class="btn"> Download</button>
+    <button type="button"> Download</button>
 </a>
 <a href="/mechanism/{{ mech.id }}/chemcheck">
-    <button type="button" class="btn btn-primary btn-sm">Check Chemistry</button>
+    <button type="button">Check Chemistry</button>
 </a>
-<a href="/mechanism/{{ mech.id }}/negativeA">
-    <button type="button" class="btn btn-primary btn-sm">Check negative A</button>
+<a href="/mechanism/{{ mech.id }}/pdep_negativeA">
+    <button type="button">Check pdep</button>
+</a>
+<a href="/mechanism/{{ mech.id }}/dup_negative_A">
+    <button type="button">Check duplicate reaction</button>
 </a>
 {% endif %}
 

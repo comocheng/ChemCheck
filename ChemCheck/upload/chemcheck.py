@@ -215,3 +215,55 @@ class CheckNegativeA:
             if error_rxn_dict[key] != []:
                 error_equation_list[key] = value
         return error_equation_list
+    
+    def duplicate_reactions(self):
+        duplicate_reactions = {}
+        reactions = self.chem_data['reactions']
+        for r in reactions:
+            if ('duplicate', True) in r.items() and 'rate-constant' in r.keys():
+                reaction_equation = r['equation']
+                rate_constant = r['rate-constant']
+                if reaction_equation not in duplicate_reactions.keys():
+                    duplicate_reactions[reaction_equation] = [rate_constant]
+                else:
+                    duplicate_reactions[reaction_equation].append(rate_constant)
+        for reaction_equation, rate_constant in duplicate_reactions.items():
+            duplicate_reactions[reaction_equation] = [rate_constant]
+        return duplicate_reactions
+    
+    def duplicate_reactions_multi_P(self):
+        duplicate_reactions = {}
+        reactions = self.chem_data['reactions']
+        for r in reactions:
+            if ('duplicate', True) in r.items() and 'rate-constants' in r.keys():
+                reaction_equation = r['equation']
+                rate_constants = r['rate-constants']
+                if reaction_equation not in duplicate_reactions.keys():
+                    duplicate_reactions[reaction_equation] = [rate_constants]
+                else:
+                    duplicate_reactions[reaction_equation].append(rate_constants)
+        arrhenius_parameter_dict = {}
+        new_arrhenius_parameter_dict = {}
+        for rxn, rate_constants in duplicate_reactions.items():
+            if len(rate_constants) == 1:
+                for rate_constant in rate_constants:
+                    same_p_list = list_of_rate_constants_with_same_pressure(rate_constant, 0, [])
+                    new_list_of_reaction_constants = bigger_list(rate_constant, same_p_list, [], 0)
+                    new_arrhenius_parameter_dict[rxn] = new_list_of_reaction_constants
+            else:
+                arrhenius_parameter_dict[rxn] = []
+                for list in rate_constants:
+                    for parameter_dict in list:
+                        arrhenius_parameter_dict[rxn].append(parameter_dict)
+        for parameter_list in arrhenius_parameter_dict.values():
+            for idx_of_para in range(len(parameter_list)):
+                min_idx = idx_of_para
+                for idx_of_rest_para in range(idx_of_para + 1, len(parameter_list)):
+                    if parameter_list[min_idx]['P'].split()[0] > parameter_list[idx_of_rest_para]['P'].split()[0]:
+                        min_idx = idx_of_rest_para
+                parameter_list[idx_of_para], parameter_list[min_idx] = parameter_list[min_idx], parameter_list[idx_of_para]
+        for i, k in arrhenius_parameter_dict.items():
+                    same_p_list = list_of_rate_constants_with_same_pressure(k, 0, [])
+                    new_list_of_reaction_constants = bigger_list(k, same_p_list, [], 0)
+                    new_arrhenius_parameter_dict[i] = new_list_of_reaction_constants
+        return new_arrhenius_parameter_dict
