@@ -114,6 +114,8 @@ def ck2yaml(request, pk):
                                         species = str(e).split()[-1]
                                         suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
                                     #suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                                    elif value_error:
+                                        suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))
                                 elif position == -1:
                                     suggestion += 'Suggestion: You are missing the index number 4 at the end of the line {}!'.format(line_num)
                                 elif position != 79 and position != -1:
@@ -146,7 +148,7 @@ def ck2yaml(request, pk):
             elif duplicate_reaction_type:
                 suggestion += 'Suggestion: You may have two set of parameters for one reaction \n Try to delete the duplicate parameters and convert again .'
         elif transport_error:
-            suggestion += 'Suggestion: You can manually add the transport data for that species \nor you can delete the transport file and do the conversion again.'
+            suggestion += 'Suggestion: You can manually add the transport data for that species\nor delete the species from mechanism file \nor you can delete the transport file and do the conversion again.'
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
