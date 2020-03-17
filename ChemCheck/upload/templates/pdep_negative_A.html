@@ -2,14 +2,14 @@
 
 {% block content %}
 {% for reaction in negative_A_reactions %}
-    <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found reactions with negative A factor!</font></p>
+    <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;">We have found pressure dependent reactions with negative A factor!</font></p>
     <ul>
         <li>
             {{ reaction }}
         </li>
     </ul>
 {% empty %}
-    <p><font size="8" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No species with negative A factor!</font></p>
+    <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No pressure dependent reactions with negative A factor!</font></p>
 {% endfor %}
 
 
