@@ -7,6 +7,7 @@ report error messages and codes around the error line when conversion fails. In 
 Next Step: we will test different error files reported in Cantera users group to provide more error diagnosis.
 
 Initial setup, installing dependencies using conda:
+    
     $ conda create -n chemcheck python=3.8 
     $ conda install -c conda-forge django\>=2.2.2 ruamel.yaml numpy pyyaml matplotlib
     $ conda activate chemcheck
