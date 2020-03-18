@@ -6,6 +6,9 @@ import os
 import linecache
 
 def cp_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
+    """
+    This function calculates NASA 7 polynomial Cp/R
+    """
     if T < T_mid:
         cp_low = Nasa_poly_low[0] + Nasa_poly_low[1] * T + Nasa_poly_low[2] * T ** 2 + Nasa_poly_low[3] * T ** 3 + Nasa_poly_low[4] * T ** 4
         return cp_low
@@ -21,6 +24,9 @@ def cp_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
             return cp_low, cp_high
 
 def h_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
+    """
+    This function calculates NASA 7 polynomial H/RT
+    """
     if T < T_mid:
        h_low = Nasa_poly_low[0] + Nasa_poly_low[1] / 2 * T + Nasa_poly_low[2] / 3 * T ** 2 + Nasa_poly_low[3] / 4 * T ** 3 + Nasa_poly_low[4] / 5 * T ** 4 + Nasa_poly_low[5] / T
        return h_low
@@ -36,6 +42,9 @@ def h_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
             return h_low, h_high
 
 def s_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
+    """
+    This function calculates NASA 7 polynomial S/R
+    """
     if T < T_mid:
        s_low = Nasa_poly_low[0] * math.log(T) + Nasa_poly_low[1] * T + Nasa_poly_low[2] / 2 * T ** 2 + Nasa_poly_low[3] / 3 * T ** 3 + Nasa_poly_low[4] / 4 * T ** 4 + Nasa_poly_low[6]
        return s_low
@@ -53,6 +62,10 @@ def s_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
 
 
 class ChemError:
+    """
+    This class checks the NASA Polynomial discontinuity and plot the figures
+    for discontinuous species by matplotlib
+    """
     def __init__(self, path, name):
         self.path = path
         self.name = name
@@ -119,6 +132,10 @@ class ChemError:
                 #     print(species['name'], T_continuouse)
 
 def err_line_without_comment(path, line_num):
+    """
+    This function helps locate the real postion where the thermo data of a
+    species starts
+    """
     err_line = linecache.getline(path, line_num)
     if len(err_line) != 0:
         if err_line[0] == '!' or err_line[-2] == '!':
@@ -131,6 +148,9 @@ def err_line_without_comment(path, line_num):
         return err_line
 
 def list_of_rate_constants_with_same_pressure(rate_constants, index, same_pressure_list):
+    """
+    This helper function puts the arrhenius parameter under same pressure into one list
+    """
     if index < len(rate_constants) - 1:
         if float(rate_constants[index]['P'].split()[0]) == float(rate_constants[index + 1]['P'].split()[0]):
             same_pressure_list.append(rate_constants[index])
@@ -149,6 +169,10 @@ def list_of_rate_constants_with_same_pressure(rate_constants, index, same_pressu
         return same_pressure_list
 
 def bigger_list(rate_constants, same_p_list, big_list, sum_of_selected_constants):
+    """
+    This helper function rearrange the thermo data for a species to make a bigger list 
+    with sublists which contains arrhenius parameters of that species under the same pressure
+    """
     big_list.append(same_p_list)
     sum_of_selected_constants += len(same_p_list)
     rest_of_constants  = len(rate_constants) - sum_of_selected_constants
@@ -159,30 +183,40 @@ def bigger_list(rate_constants, same_p_list, big_list, sum_of_selected_constants
         return big_list
 
 class CheckNegativeA:
+    """
+    This class check for negative A, negative sum of k for pressure dependent 
+    reactions under same pressure, and negative sum of k for duplicate reactions 
+    """
     def __init__(self, path):
         self.path = path
         with open(self.path, 'r') as f:
             self.chem_data = yaml.load(f, Loader=yaml.FullLoader)
         
     def new_arrhenius_dict(self):
-            new_arrhenius_dict = {}
-            cons_list_of_1_rxn = {}
-            arrhenius_reactions = []
-            reactions = self.chem_data['reactions']
-            for r in reactions:
-                if ('type', 'pressure-dependent-Arrhenius') in r.items():
-                    arrhenius_reactions.append(r)
-            for reaction in arrhenius_reactions:
-                rate_constants = reaction['rate-constants']
-                reaction_equation = reaction['equation']
-                cons_list_of_1_rxn[reaction_equation] = rate_constants
-            for i, k in cons_list_of_1_rxn.items():
-                same_p_list = list_of_rate_constants_with_same_pressure(k, 0, [])
-                new_list_of_reaction_constants = bigger_list(k, same_p_list, [], 0)
-                new_arrhenius_dict[i] = new_list_of_reaction_constants
-            return new_arrhenius_dict
+        """
+        This function rearrange the pressure dependent reactions 
+        """
+        new_arrhenius_dict = {}
+        cons_list_of_1_rxn = {}
+        arrhenius_reactions = []
+        reactions = self.chem_data['reactions']
+        for r in reactions:
+            if ('type', 'pressure-dependent-Arrhenius') in r.items():
+                arrhenius_reactions.append(r)
+        for reaction in arrhenius_reactions:
+            rate_constants = reaction['rate-constants']
+            reaction_equation = reaction['equation']
+            cons_list_of_1_rxn[reaction_equation] = rate_constants
+        for i, k in cons_list_of_1_rxn.items():
+            same_p_list = list_of_rate_constants_with_same_pressure(k, 0, [])
+            new_list_of_reaction_constants = bigger_list(k, same_p_list, [], 0)
+            new_arrhenius_dict[i] = new_list_of_reaction_constants
+        return new_arrhenius_dict
 
     def check_negative_A_factor(self, new_arrhenius_dict):
+        """
+        This function checks the negative A for pressure with only one set of arrhenius parameters
+        """
         error_reactions = {}
         for equation, value in new_arrhenius_dict.items():
             for parameter_list in value:
@@ -197,6 +231,10 @@ class CheckNegativeA:
         return error_reactions
 
     def check_sum_of_k(self, new_arrhenius_dict, t):
+        """
+        This fucntion checks the sum of k for pressure dependent reactions under 
+        the pressure which has more than one set of arrhenius parameters
+        """
         error_rxn_dict = {}
         for equation, value in new_arrhenius_dict.items():
             error_rxn_dict[equation] = []
@@ -217,6 +255,10 @@ class CheckNegativeA:
         return error_equation_list
     
     def duplicate_reactions(self):
+        """
+        This function rearrange the pressure independent duplicate reactions to 
+        input format for check_sum_of_k
+        """
         duplicate_reactions = {}
         reactions = self.chem_data['reactions']
         for r in reactions:
@@ -232,6 +274,10 @@ class CheckNegativeA:
         return duplicate_reactions
     
     def duplicate_reactions_multi_P(self):
+        """
+        This function rearrange the pressure dependent duplicate reactions to the input
+        format for check_sum_of_k function
+        """
         duplicate_reactions = {}
         reactions = self.chem_data['reactions']
         for r in reactions:
