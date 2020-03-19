@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, DetailView, View
 from .forms import ChemkinUpload
 from .models import Mechanism
+from .chemcheck import ChemError, CheckNegativeA, err_line_without_comment
 from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
 import os
@@ -9,7 +10,8 @@ import re
 from django.core.files.base import File
 from django.urls import reverse_lazy
 from .ck2yaml import strip_nonascii
-
+import linecache
+from canteradebugger.settings import MEDIA_ROOT
 
 # Create your views here.
 
@@ -36,18 +38,20 @@ def ck2yaml(request, pk):
 
     from .ck2yaml import Parser
     import traceback
-    import logging
-
+    import tempfile
+    from canteradebugger.settings import MEDIA_ROOT
 
     input_file = mechanism.ck_mechanism_file.path
     thermo_file =  mechanism.ck_thermo_file.path if mechanism.ck_thermo_file else None
     transport_file = mechanism.ck_transport_file.path if mechanism.ck_transport_file else None
     surface_file = mechanism.ck_surface_file.path if mechanism.ck_surface_file else None
-    phase_name = None # will default to 'gas'
-    out_name = os.path.join(os.path.split(input_file)[0], 'cantera.txt')
+    phase_name = 'gas' # will default to 'gas'
+    out_name = os.path.join(os.path.split(input_file)[0], 'cantera.yaml')
     error_filename = os.path.join(os.path.split(input_file)[0], 'error.txt')
-    open(error_filename, "w").close() # wipes the file it already existed.
+    with open(error_filename, 'w') as err_content:
+        err_content.write('This is the error generated from Mechanism{0}\n'.format(mechanism.id))
     parser = Parser()
+    suggestion = ''
 
     try:
         parser.convert_mech(input_file, 
@@ -60,24 +64,91 @@ def ck2yaml(request, pk):
                         permissive = True,
                         )
     except Exception as e:
-        
         with open(error_filename, "r") as err:
             content = err.read()
         conversion_log += str(content)
         conversion_log += str(e)                      
         error_message = traceback.format_exc()
         conversion_log += error_message
-
+        syn_error = re.search('Section starts with unrecognized keyword', str(e))
+        ec_error = re.search("Error parsing elemental composition for "
+                             "species (?P<name>...)", str(e))
+        missing_end_number = re.search('Error while reading thermo entry starting on line (\d+)', conversion_log)
+        value_error = re.search("ValueError: could not convert string to float: (?P<name>...)", conversion_log)
+        transport_error = re.search("No transport data for species ", str(e))
+        duplicate_reaction_type = re.search('Reaction entry contains parameters for more than one reaction type', str(e))
+        
         match = re.search('Unable to parse .* near line (\d+):', content)
         if match:
             conversion_log += '\n\n'
             line_number = int(match.group(1))
             error_path = match.group(0).split("'")[1]
-            with open(error_path) as ck:
+            with open(error_path, 'r', errors='ignore') as ck:
                 lines = ck.readlines()
             context = 4
             excerpt = lines[ max(line_number-context,0):min(line_number+context, len(lines)) ]
             conversion_log += '\n'.join(excerpt)
+            error_file_name = os.path.split(error_path)[1]
+            if syn_error:
+                suggestion += 'Suggestion: Please replace or delete any special character or redundant word in {0} line {1}'.format(error_file_name, line_number)
+            
+            elif missing_end_number:
+                with open(error_path, 'r', errors='ignore'):
+                    line_num = int(missing_end_number.group(1))
+                    err_line, line_num = err_line_without_comment(error_path, line_num)
+                    position = int(err_line.rfind('1', 74, 84))
+                    if position == 79:
+                        line_num += 1
+                        err_line = linecache.getline(error_path, line_num)
+                        position = int(err_line.rfind('2', 74, 84))
+                        if position == 79:
+                            line_num += 1
+                            err_line = linecache.getline(error_path, line_num)
+                            position = int(err_line.rfind('3', 74, 84))
+                            if position == 79:
+                                line_num += 1
+                                err_line = linecache.getline(error_path, line_num)
+                                position = int(err_line.rfind('4', 74, 84))
+                                if position == 79:
+                                    if ec_error:
+                                        species = str(e).split()[-1]
+                                        suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
+                                    #suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                                    elif value_error:
+                                        suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))
+                                elif position == -1:
+                                    suggestion += 'Suggestion: You are missing the index number 4 at the end of the line {}!'.format(line_num)
+                                elif position != 79 and position != -1:
+                                    suggestion += 'Suggestion: The index number 4 at the end of line {} is not in the same column with other lines'.format(line_num)
+                                # else:
+                                #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                            elif position == -1:
+                                suggestion += 'Suggestion: You are missing the index number 3 at the end of the line {}!'.format(line_num)
+                            elif position != 79 and position != -1:
+                                suggestion += 'Suggestion: The index number 3 at the end of line {} is not in the same column with other lines'.format(line_num)
+                            # else:
+                            #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                        elif position == -1:
+                            suggestion += 'Suggestion: You are missing the index number 2 at the end of the line {}!'.format(line_num)
+                        elif position != 79 and position != -1:
+                            suggestion += 'Suggestion: The index number 2 at the end of line {} is not in the same column with other lines'.format(line_num)
+                        # else:
+                        #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+                    elif position == -1:
+                        suggestion += 'Suggestion: You are missing the index number 1 at the end of the line {}!'.format(line_num)
+                    elif position != 79 and position != -1:
+                        suggestion += 'Suggestion: The index number 1 at the end of line {} is not in the same column with other lines'.format(line_num)
+                    # else:
+                    #     suggestion += 'Suggestion: Please make sure your NASA data are neatly aligned in the 5 columns \n and the format of your first line is correct'
+            elif ec_error:
+                species = str(e).split()[-1]
+                suggestion += 'Suggestion: Please make sure there is no indent error and typo in the error species {0} data in \n{1}(You can do this by comparing the error species with other species in the file).\nYou can also delete the data of species {0} and manually add them into converted file'.format(species, error_file_name)
+            elif value_error:
+                suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))            
+            elif duplicate_reaction_type:
+                suggestion += 'Suggestion: You may have two set of parameters for one reaction \n Try to delete the duplicate parameters and convert again .'
+        elif transport_error:
+            suggestion += 'Suggestion: You can manually add the transport data for that species\nor delete the species from mechanism file \nor you can delete the transport file and do the conversion again.'
         mechanism.ct_conversion_errors = error_message
         mechanism.ct_mechanism_file = None
         mechanism.save()
@@ -89,6 +160,7 @@ def ck2yaml(request, pk):
     return render(request, 'ck2yaml.html', {
        'mech': mechanism,
        'conversion_log': conversion_log,
+       'suggestion': suggestion
     })
 
     
@@ -228,3 +300,45 @@ class MechanismUpdateView(MechanismObjectMixin, View):
             form.save()
             url = reverse_lazy('mechanism-detail', args=[obj.pk])
             return HttpResponseRedirect(url)
+
+def chemcheck(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+    name = 'cantera'
+    species_name = ChemError(path, name).check_continuity()
+    return render(request, 'chemcheck.html', {
+        'species_name':species_name
+    })
+
+def check_pdep_negative_A(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+    new_list_pdep = CheckNegativeA(path).new_arrhenius_dict()
+    negative_A_reactions = CheckNegativeA(path).check_negative_A_factor(new_list_pdep)
+    arr_sum_error_dict = {}
+    T = [200, 500, 1000, 2000, 5000, 10000]
+    for t in T:
+        arr_sum_error = CheckNegativeA(path).check_sum_of_k(new_list_pdep, t)
+        arr_sum_error_dict['{} K'.format(t)] = arr_sum_error
+    return render(request, 'pdep_negative_A.html',{
+        'negative_A_reactions':negative_A_reactions,
+        'arr_sum_error_dict':arr_sum_error_dict,
+    })
+
+def check_negative_dup_rxns_negative_A(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+    duplicate_reactions = CheckNegativeA(path).duplicate_reactions()
+    pdep_duplicate_reactions = CheckNegativeA(path).duplicate_reactions_multi_P()
+    dup_rxns_err_dict = {}
+    pdep_dup_err_dict = {}
+    T = [200, 500, 1000, 2000, 5000, 10000]
+    for t in T:
+        duplicate_reactions_err = CheckNegativeA(path).check_sum_of_k(duplicate_reactions, t)
+        pdep_duplicate_reactions_err = CheckNegativeA(path).check_sum_of_k(pdep_duplicate_reactions, t)
+        dup_rxns_err_dict['{} K'.format(t)] = duplicate_reactions_err
+        pdep_dup_err_dict['{} K'.format(t)] = pdep_duplicate_reactions_err
+    return render(request, 'dup_negative_A.html', {
+        'dup_rxns_err_dict':dup_rxns_err_dict,
+        'pdep_dup_err_dict':pdep_dup_err_dict
+    })

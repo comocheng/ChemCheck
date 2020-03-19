@@ -2,3 +2,6 @@
 django
 numpy
 ruamel-yaml
+pyyaml
+matplotlib
+

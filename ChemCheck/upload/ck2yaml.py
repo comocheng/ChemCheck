@@ -1717,8 +1717,7 @@ class Parser:
                 else:
                     advance = True
 
-        self.check_duplicate_reactions()
-
+        #self.check_duplicate_reactions()
         for index, reaction in enumerate(self.reactions):
             reaction.index = index + 1
 
@@ -1928,7 +1927,7 @@ class Parser:
         if quiet:
             logging.basicConfig(level=logging.ERROR)
         else:
-            logging.basicConfig(filename=p, level=logging.INFO)
+            logging.basicConfig(force=True, filename=p, level=logging.INFO)
 
         if permissive is not None:
             parser.warning_as_error = not permissive

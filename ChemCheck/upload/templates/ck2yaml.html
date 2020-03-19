@@ -5,19 +5,30 @@
 
 <pre>
 {{ conversion_log }}
+<font size="3" color="red">
+{{ suggestion }}
+</font>
 </pre>
 
 
 {% if mech.ct_mechanism_file %}
 <br>
 Cantera YAML file: 
-<a href="/media/uploads/{{ mech.id }}/cantera.txt">
-    <button type="button" class="btn btn-primary btn-sm">View</button>
+<a href="/media/uploads/{{ mech.id }}/cantera.yaml">
+    <button type="button" >View</button>
 </a>
 {% load static %}
-<a href="/media/uploads/{{ mech.id }}/cantera.txt" download>
-    <link rel="stylesheet" href="{% static 'CSS/downloadbutton.css' %}" type="text/css">
-    <button class="btn"> Download</button>
+<a href="/media/uploads/{{ mech.id }}/cantera.yaml" download>
+    <button type="button"> Download</button>
+</a>
+<a href="/mechanism/{{ mech.id }}/chemcheck">
+    <button type="button">Check Chemistry</button>
+</a>
+<a href="/mechanism/{{ mech.id }}/pdep_negativeA">
+    <button type="button">Check pdep</button>
+</a>
+<a href="/mechanism/{{ mech.id }}/dup_negative_A">
+    <button type="button">Check duplicate reaction</button>
 </a>
 {% endif %}
 

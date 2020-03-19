@@ -1,11 +1,19 @@
 from django.db import models
 from django.utils import timezone
 import datetime
+import yaml
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+import linecache
+
 
 # Create your models here.
 
 def upload_to(instance, filename):
     return 'uploads/{id}/{fn}'.format(id=instance.pk,fn=filename)
+
 
 class Mechanism(models.Model):
     """
@@ -26,6 +34,7 @@ class Mechanism(models.Model):
 
     def get_absolute_url(self):
         return 'uploads/{self.id}/'
+    
 
 
     def save(self, *args, **kwargs):

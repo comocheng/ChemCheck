@@ -9,9 +9,9 @@ Next Step: we will test different error files reported in Cantera users group to
 ### Initital setup
 
 Initial setup, installing dependencies using conda:
-
-    $ conda create -n chemcheck python=3.8 
-    $ conda install -c conda-forge django\>=2.2.2 ruamel.yaml numpy
+    
+    $ conda create -n chemcheck python>=3.8 
+    $ conda install -c conda-forge django\>=2.2.2 ruamel.yaml numpy pyyaml matplotlib
     $ conda activate chemcheck
     $ cd ChemCheck
 
