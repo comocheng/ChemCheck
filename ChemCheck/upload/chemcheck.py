@@ -242,7 +242,7 @@ class CheckNegativeA:
                 if len(parameter_list) != 1:
                     k_list = []
                     for rate_parameter in parameter_list:
-                        rate_constant = rate_parameter['A'] * (t ** rate_parameter['b']) * math.exp(rate_parameter['Ea'] / (1.985877534 * t))
+                        rate_constant = rate_parameter['A'] * (t ** rate_parameter['b']) * math.exp((-rate_parameter['Ea']) / (1.985877534 * t))
                         k_list.append(rate_constant)
                     sum_of_k = sum(k_list)
                     if sum_of_k <= 0:
