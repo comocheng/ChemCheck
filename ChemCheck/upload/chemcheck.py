@@ -59,7 +59,15 @@ def s_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
         else:
             return s_low, s_high
             
+def get_kf(rate_parameter, T):
+    kf = rate_parameter['A'] * (T ** rate_parameter['b']) * math.exp(-rate_parameter['Ea'] / (1.985877534 * T))
+    return kf
 
+class ChemicalError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)   
 
 class ChemError:
     """
@@ -201,7 +209,7 @@ class CheckNegativeA:
         arrhenius_reactions = []
         reactions = self.chem_data['reactions']
         for r in reactions:
-            if ('type', 'pressure-dependent-Arrhenius') in r.items():
+            if ('type', 'pressure-dependent-Arrhenius') in r.items() and 'duplicate' not in r.keys():
                 arrhenius_reactions.append(r)
         for reaction in arrhenius_reactions:
             rate_constants = reaction['rate-constants']
@@ -313,3 +321,349 @@ class CheckNegativeA:
                     new_list_of_reaction_constants = bigger_list(k, same_p_list, [], 0)
                     new_arrhenius_parameter_dict[i] = new_list_of_reaction_constants
         return new_arrhenius_parameter_dict
+
+
+
+class check_collision_violation(CheckNegativeA):
+    def __init__(self, path):
+        self.path = path
+        self.chem_elements = {'H': 1.00811, 'He': 4.002602, 'Li':6.938, 'Be':9.0121831,'B':10.806, 
+                              'C': 12.0096, 'N': 14.00728, 'O': 15.99903, 'F': 18.998403163, 'Ne': 20.1797, 
+                              'Si': 28.084,'P': 30.973761998, 'S': 32.059, 'Cl': 35.446, 'Ar': 39.948, 
+                              'Br': 79.904, 'I': 126.90447, 'Kr': 83.8, 'Xe': 131.29}
+
+        with open(self.path, 'r') as f:
+            self.chem_data = yaml.load(f, Loader=yaml.FullLoader)
+        if 'elements' in self.chem_data.keys():
+            isotope_list = self.chem_data['elements']
+            for isotope in isotope_list:
+                symbol = isotope['symbol']
+                atomic_weight = isotope['atomic-weight']
+                try:
+                    self.chem_elements[symbol]
+                    raise Exception('isotope name is same with the element, please change')
+                except KeyError:
+                    self.chem_elements[symbol] = atomic_weight
+        
+    def get_reduced_mass(self, equation, reverse=False):
+        if not reverse:
+            eqn_list = equation.split()
+            reactants = [eqn_list[0], eqn_list[2]]
+            for i, reactant in enumerate(reactants):
+                if reactant == 'NO':
+                    reactants[i] = False
+            species_list = self.chem_data['species']
+            reactant1 = 0
+            reactant2 = 0 
+            for species in species_list:
+                if species['name'] == reactants[0]:
+                    composition = species['composition']
+                    for element, num in composition.items():
+                        reactant1 += self.chem_elements[element] * num
+                if species['name'] == reactants[1]:
+                    composition = species['composition']
+                    for element, num in composition.items():
+                        reactant2 += self.chem_elements[element] * num
+            if reactant1 == 0:
+                raise ChemicalError('No species data for {}'.format(reactants[0]))
+            elif reactant2 == 0:
+                raise ChemicalError('No species data for {}'.format(reactants[1]))
+            reduced_mass = reactant1 * reactant2 / (reactant1 + reactant2)
+            return reduced_mass
+        else:
+            eqn_list = equation.split()
+            products = [eqn_list[-1], eqn_list[-3]]
+            for i, product in enumerate(products):
+                if product == 'NO':
+                    products[i] = False
+            species_list = self.chem_data['species']
+            product1 = 0
+            product2 = 0 
+            for species in species_list:
+                if species['name'] == products[0]:
+                    composition = species['composition']
+                    for element, num in composition.items():
+                        product1 += self.chem_elements[element] * num
+                if species['name'] == products[1]:
+                    composition = species['composition']
+                    for element, num in composition.items():
+                        product2 += self.chem_elements[element] * num
+            if product1 == 0:
+                raise ChemicalError('No species data for {}'.format(products[0]))
+            elif product2 == 0:
+                raise ChemicalError('No species data for {}'.format(products[1]))
+            reduced_mass = product1 * product2 / (product1 + product2)
+            return reduced_mass
+        
+    def get_epsilon_sigma(self, equation, reverse=False):
+        epsilon = []
+        sigma = []
+        if reverse:
+            products = self.get_products(equation)
+            for product in products:
+                for spc in self.chem_data['species']:
+                    if spc['name'] == product:
+                        well_depth = spc['transport']['well-depth']
+                        diameter = spc['transport']['diameter']
+                        epsilon.append(well_depth)
+                        sigma.append(diameter)
+            mean_epsilon = sum(epsilon) / len(products) / 100
+            mean_sigma = sum(sigma) / len(products) / 100
+            return mean_epsilon, mean_sigma
+        else:
+            reactants = self.get_reactants(equation)
+            for reactant in reactants:
+                for spc in self.chem_data['species']:
+                    if spc['name'] == reactant:
+                        well_depth = spc['transport']['well-depth']
+                        diameter = spc['transport']['diameter']
+                        epsilon.append(well_depth)
+                        sigma.append(diameter)
+            mean_epsilon = sum(epsilon) / len(reactants) / 100
+            mean_sigma = sum(sigma) / len(reactants) / 100
+            return mean_epsilon, mean_sigma
+
+    def cal_collision_limit(self,T, equation, reverse=False):
+        if not reverse:
+            reduced_mass = self.get_reduced_mass(equation)
+            epsilon, sigma = self.get_epsilon_sigma(equation)
+            Tr = T * (1.3806504e-23) / epsilon
+            reduced_coll_integral = 1.16145 * Tr ** (-0.14874) + 0.52487 * math.exp(-0.7732 * Tr) + 2.16178 * math.exp(
+                                    -2.437887 * Tr)
+            k_coll = (1e3) * (math.sqrt(8 * math.pi * (1.3806504e-23) * T / reduced_mass) * sigma ** 2
+                  * reduced_coll_integral * (6.02214179e23))
+            return k_coll
+        else:
+            reduced_mass = self.get_reduced_mass(equation, reverse=True)
+            epsilon, sigma = self.get_epsilon_sigma(equation, reverse=True)
+            Tr = T * (1.3806504e-23) / epsilon
+            reduced_coll_integral = 1.16145 * Tr ** (-0.14874) + 0.52487 * math.exp(-0.7732 * Tr) + 2.16178 * math.exp(
+                                    -2.437887 * Tr)
+            k_coll = (1e3) * (math.sqrt(8 * math.pi * (1.3806504e-23) * T / reduced_mass) * sigma ** 2
+                  * reduced_coll_integral * (6.02214179e23))
+            return k_coll
+    
+    def get_reactants(self, equation):
+        eqn_eles = equation.split()
+        for idx, eqn_ele in enumerate(eqn_eles):
+            if eqn_ele == '<=>' or eqn_ele == '=>':
+                reactants = eqn_eles[0:idx]
+                for idx, reactant in enumerate(reactants):
+                    if reactant == '+':
+                        del reactants[idx]
+        for i, reactant in enumerate(reactants):
+            if reactant == 'NO':
+                reactants[i] = False       
+        return reactants
+    
+    def get_products(self, equation):
+        eqn_eles = equation.split()
+        for idx, eqn_ele in enumerate(eqn_eles):
+            if eqn_ele == '<=>' or eqn_ele == '=>':
+                products = eqn_eles[idx + 1:len(eqn_eles)]
+                for idx, product in enumerate(products):
+                    if product == '+':
+                        del products[idx]
+        for i, product in enumerate(products):
+            if product == 'NO':
+                products[i] = False
+        return products
+    
+    def get_equilibrium_constant(self, reactants, products, T):
+        reactants_H = 0
+        products_H = 0
+        reactants_S = 0
+        products_S = 0
+        for reactant in reactants:
+            for species in self.chem_data['species']:
+                if species['name'] == reactant:
+                    T_mid = species['thermo']['temperature-ranges'][1]
+                    Nasa_poly_high = species['thermo']['data'][1]
+                    Nasa_poly_low = species['thermo']['data'][0]
+                    h = h_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high)
+                    s = s_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high)
+                    if type(h) is tuple:
+                        reactants_H += h[1] * 8.31446261815324 * T
+                    else:
+                        reactants_H += h * 8.31446261815324 * T
+                    if type(s) is tuple:
+                        reactants_S += s[1] * 8.31446261815324
+                    else:
+                        reactants_S += s * 8.31446261815324
+        for product in products:
+            for species in self.chem_data['species']:
+                if species['name'] == product:
+                    T_mid = species['thermo']['temperature-ranges'][1]
+                    Nasa_poly_high = species['thermo']['data'][1]
+                    Nasa_poly_low = species['thermo']['data'][0]
+                    h = h_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high)
+                    s = s_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high)
+                    if type(h) is tuple:
+                        products_H += h[1] * 8.31446261815324 * T
+                    else:
+                        products_H += h * 8.31446261815324 * T
+                    if type(s) is tuple:
+                        products_S += s[1] * 8.31446261815324
+                    else:
+                        products_S += s * 8.31446261815324
+        Gibbs_free_energy = (products_H - reactants_H) - T * (products_S - reactants_S)
+        equilibrium_constant = math.exp(-Gibbs_free_energy / 8.31446261815324 / T)
+        return equilibrium_constant    
+    
+    def get_elementary_rxns(self):
+        elementary_rxns = []
+        reactions = self.chem_data['reactions']
+        for rxn in reactions:
+            if list(rxn.keys()) == ['equation', 'rate-constant'] or list(rxn.keys()) == ['equation', 'rate-constant', 'note']:
+                elementary_rxns.append(rxn)
+        return elementary_rxns
+                
+        
+    def check_collison_violation(self, T, P):
+        violation_check = {}
+        elementary_rxns = self.get_elementary_rxns()
+        duplicate_rxns = self.duplicate_reactions()
+        duplicate_rxns_multi_P = self.duplicate_reactions_multi_P()
+        pdep_rxns = self.new_arrhenius_dict()
+        
+        for rxn in elementary_rxns:
+            eqn = rxn['equation']
+            reactants = self.get_reactants(eqn)
+            products = self.get_products(eqn)
+            if len(reactants) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn)
+                rate_parameter = rxn['rate-constant']
+                kf = rate_parameter['A'] * (T ** rate_parameter['b']) * math.exp(-rate_parameter['Ea'] / (1.985877534 * T))
+                if collision_limit < kf:
+                    violation_factor = kf / collision_limit
+                    violation_check[eqn] = {'forward violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'forward rate coefficient': kf}
+            if len(products) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
+                equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
+                rate_parameter = rxn['rate-constant']
+                kf = rate_parameter['A'] * (T ** rate_parameter['b']) * math.exp(-rate_parameter['Ea'] / (1.985877534 * T))
+                kr = kf / equilibrium_constant
+                if collision_limit < kr:
+                    violation_factor = kr / collision_limit
+                    if eqn in violation_check.keys():
+                        violation_check[eqn]['reverse violation factor'] = violation_factor
+                    else:
+                        violation_check[eqn] = {'reverse violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'reverse rate coefficient': kr}
+        
+        for eqn, arr_parameters in duplicate_rxns.items():
+            reactants = self.get_reactants(eqn)
+            products = self.get_products(eqn)
+            if len(reactants) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn)
+                kf_list = []
+                for arr_parameter in arr_parameters[0]:
+                    kf = get_kf(arr_parameter, T)
+                    kf_list.append(kf)
+                kf_dup = sum(kf_list)
+                if collision_limit < kf_dup:
+                    violation_factor = kf_dup / collision_limit
+                    violation_check[eqn] = {'type': 'duplicate reaction', 'forward violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'forward rate coefficient': kf_dup}
+            if len(products) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
+                equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
+                for arr_parameter in arr_parameters[0]:
+                    kf = get_kf(arr_parameter, T)
+                    kf_list.append(kf)
+                kf_dup = sum(kf_list)
+                kr_dup = kf_dup / equilibrium_constant
+                if collision_limit < kr_dup:
+                    violation_factor = kr_dup / collision_limit
+                    violation_check[eqn] = {'type': 'duplicate reaction', 'reverse violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'reverse rate coefficient': kr_dup} 
+        
+        for eqn, arr_parameters in pdep_rxns.items():
+            reactants = self.get_reactants(eqn)
+            products = self.get_products(eqn)
+            if len(reactants) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn)
+                kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
+                if kf_pdep > collision_limit:
+                    violation_factor = kf_pdep / collision_limit
+                    violation_check[eqn] = {'type': 'pressure dependent reaction', 'forward violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'forward rate coefficient': kf_pdep}
+            if len(products) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
+                equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
+                kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
+                kr_pdep = kf_pdep / equilibrium_constant
+                if kr_pdep > collision_limit:
+                    violation_factor = kr_pdep / collision_limit
+                    violation_check[eqn] = {'type': 'pressure dependent reaction', 'reverse violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'reverse rate coefficient': kr_pdep}
+        
+        for eqn, arr_parameters in duplicate_rxns_multi_P.items():
+            reactants = self.get_reactants(eqn)
+            products = self.get_products(eqn)
+            if len(reactants) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn)
+                kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
+                if kf_pdep > collision_limit:
+                    violation_factor = kf_pdep / collision_limit
+                    violation_check[eqn] = {'type': 'duplicate pressure dependent reaction', 'forward violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'forward rate coefficient': kf_pdep}
+            if len(products) == 2:
+                collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
+                equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
+                kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
+                kr_pdep = kf_pdep / equilibrium_constant
+                if kr_pdep > collision_limit:
+                    violation_factor = kr_pdep / collision_limit
+                    violation_check[eqn] = {'type': 'duplicate pressure dependent reaction', 'reverse violation factor': violation_factor, 'collision limit': collision_limit,
+                                            'reverse rate coefficient': kr_pdep}
+                
+        return violation_check
+    
+    def cal_pdep_rate(self, pdep_rxns:list, T, P)->float:
+        small_p = []
+        large_p = []
+        for arr_parameters in pdep_rxns:
+            p = float(arr_parameters[0]['P'].split()[0])
+            if p == P and len(arr_parameters) == 1:
+                rate_parameters = arr_parameters[0]
+                kf = get_kf(rate_parameters, T)
+                return kf
+            elif p == P and len(arr_parameters) > 1:
+                kf_list = []
+                for arr_parameter in arr_parameters:
+                    kf = get_kf(arr_parameter, T)
+                    kf_list.append(kf)
+                kf_sum = sum(kf_list)
+                return kf_sum  
+            elif p < P:
+                small_p.append(p)
+            elif p > P:
+                large_p.append(p)
+        if len(large_p) != 0 and len(small_p) != 0:
+            p1 = small_p[-1]
+            p2 = large_p[0]
+            for i, arr_parameters in enumerate(pdep_rxns):
+                p = float(arr_parameters[0]['P'].split()[0])
+                if p == p1:
+                    k1_arr = pdep_rxns[i]
+                    k1_list = []
+                    for arr_parameter in k1_arr:
+                        kf = get_kf(arr_parameter, T)
+                        k1_list.append(kf)
+                    kf1 = sum(k1_list)            
+                elif p == p2:
+                    k2_arr = pdep_rxns[i]
+                    k2_list = []
+                    for arr_parameter in k2_arr:
+                        kf = get_kf(arr_parameter, T)
+                        k2_list.append(kf)
+                    kf2 = sum(k2_list)
+            log_k_P = math.log(kf1) + (math.log(kf2) - math.log(kf1)) * (math.log(P / p1) / math.log(p2 / p1))
+            k_P = math.exp(log_k_P)
+            return k_P
+        elif len(large_p) == 0:
+            raise ChemicalError('Pressure is too big')
+        elif len(small_p) == 0:
+            raise ChemicalError('Pressure is too small')
