@@ -4,4 +4,4 @@ numpy
 ruamel-yaml
 pyyaml
 matplotlib
-
+scons
