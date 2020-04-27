@@ -7,7 +7,7 @@ install:
   - pip freeze
   - git clone https://github.com/Cantera/cantera.git
   - cd cantera
-  - scons build
+  - scons build boost_inc_dir = '/opt/local/include'
   - scons install
 script:
   - cd ChemCheck
