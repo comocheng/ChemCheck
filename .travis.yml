@@ -5,6 +5,10 @@ install:
   - pip install -r requirements.txt
   - python -VV
   - pip freeze
+  - git clone https://github.com/Cantera/cantera.git
+  - cd cantera
+  - scons build
+  - scons install
 script:
   - cd ChemCheck
   - python manage.py makemigrations
