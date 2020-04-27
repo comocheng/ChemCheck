@@ -7,7 +7,8 @@ install:
   - pip freeze
   - git clone https://github.com/Cantera/cantera.git
   - cd cantera
-  - boost_inc_dir = '/opt/local/include'
+  - pip uninstall Cython
+  - pip install Cython
   - scons build
   - scons install
 script:
