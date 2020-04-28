@@ -88,7 +88,7 @@ class ChemError:
         with open(self.path, 'r') as f:
             chem_data = yaml.load(f, Loader=yaml.FullLoader)
         for species in chem_data['species']:
-            #T_low = species['thermo']['temperature-ranges'][0]
+            T_low = species['thermo']['temperature-ranges'][0]
             T_mid = species['thermo']['temperature-ranges'][1]
             #T_high = species['thermo']['temperature-ranges'][2]
             Nasa_poly_high = species['thermo']['data'][1]
@@ -108,11 +108,12 @@ class ChemError:
                 discontinuous_species.append(img_url)
                 #gas = ct.Solution(self.path)
                 #sp = gas.species(species['name'])
-                T = np.linspace(500, 3000, 200)
+                T = np.linspace(T_low, 5000, 200)
                 fig,ax = plt.subplots(1,3,figsize=(8,3.5))
                 cp = [cp_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
                 h = [h_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
                 s = [s_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
+                print(species)
                 ax[0].plot(T,cp)
                 ax[0].set_title('$c_p/R$')
                 ax[1].plot(T,h)
@@ -258,6 +259,7 @@ class CheckNegativeA:
                         k_list.append(rate_constant)
                     sum_of_k = sum(k_list)
                     if sum_of_k <= 0:
+                        #print(equation, sum_of_k)
                         error_rxn_dict[equation].append(parameter_list)
         error_equation_list = {}
         
@@ -410,7 +412,7 @@ class check_collision_violation(CheckNegativeA):
             for product in products:
                 for spc in self.chem_data['species']:
                     if spc['name'] == product:
-                        well_depth = spc['transport']['well-depth'] * 1.3807e-23 * 6.02214179e23
+                        well_depth = spc['transport']['well-depth'] * 1.3807e-23 * 6.02214179e23 * 1000
                         diameter = spc['transport']['diameter'] * (1e-10)
                         epsilon.append(well_depth)
                         sigma.append(diameter)
@@ -438,25 +440,19 @@ class check_collision_violation(CheckNegativeA):
             reduced_mass = self.get_reduced_mass(equation)
             epsilon, sigma = self.get_epsilon_sigma(equation)
             Tr = T * (1.3806504e-23) * (6.02214179e23) / epsilon
-            #Tr = T * (1.3806504e-23) / epsilon
             reduced_coll_integral = 1.16145 * Tr ** (-0.14874) + 0.52487 * math.exp(-0.7732 * Tr) + 2.16178 * math.exp(
                                     -2.437887 * Tr)
             k_coll = (math.sqrt(8 * math.pi * (1.3806504e-23) * T * (6.02214179e23) / reduced_mass) * sigma ** 2
                   * reduced_coll_integral * (6.02214179e23))
-            #k_coll = (1e3) * (math.sqrt(8 * math.pi * (1.3806504e-23) * T / reduced_mass) * sigma ** 2
-             #        * reduced_coll_integral * (6.02214179e23))
             return k_coll
         else:
             reduced_mass = self.get_reduced_mass(equation, reverse=True)
             epsilon, sigma = self.get_epsilon_sigma(equation, reverse=True)
             Tr = T * (1.3806504e-23) * (6.02214179e23) / epsilon
-            #Tr = T * (1.3806504e-23) / epsilon
             reduced_coll_integral = 1.16145 * Tr ** (-0.14874) + 0.52487 * math.exp(-0.7732 * Tr) + 2.16178 * math.exp(
                                     -2.437887 * Tr)
             k_coll = (math.sqrt(8 * math.pi * (1.3806504e-23) * T * (6.02214179e23) / reduced_mass) * sigma ** 2
                      * reduced_coll_integral * (6.02214179e23))
-            #k_coll = (1e3) * (math.sqrt(8 * math.pi * (1.3806504e-23) * T / reduced_mass) * (sigma ** 2)
-             #        * reduced_coll_integral * (6.02214179e23))
             return k_coll
     
     def get_reactants(self, equation):
@@ -464,12 +460,15 @@ class check_collision_violation(CheckNegativeA):
         for idx, eqn_ele in enumerate(eqn_eles):
             if eqn_ele == '<=>' or eqn_ele == '=>':
                 reactants = eqn_eles[0:idx]
+                if len(reactants) > 1 and reactants[1] != '+':  # to delete the reaction index at the beginning
+                    del reactants[0]
                 for idx, reactant in enumerate(reactants):
                     if reactant == '+':
                         del reactants[idx]
         for i, reactant in enumerate(reactants):
             if reactant == 'NO':
-                reactants[i] = False       
+                reactants[i] = False
+        #print(reactants)       
         return reactants
     
     def get_products(self, equation):
@@ -483,6 +482,7 @@ class check_collision_violation(CheckNegativeA):
         for i, product in enumerate(products):
             if product == 'NO':
                 products[i] = False
+        #print(products)
         return products
     
     def get_equilibrium_constant(self, reactants, products, T):
@@ -572,6 +572,7 @@ class check_collision_violation(CheckNegativeA):
             return violation_check
 
         except ct.CanteraError:
+            P = P / 1e5
             violation_check = {}
             elementary_rxns = self.get_elementary_rxns()
             duplicate_rxns = self.duplicate_reactions()
@@ -582,7 +583,7 @@ class check_collision_violation(CheckNegativeA):
                 eqn = rxn['equation']
                 reactants = self.get_reactants(eqn)
                 products = self.get_products(eqn)
-                if len(reactants) == 2:
+                if len(reactants) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in reactants and '(+M)' not in reactants:
                     collision_limit = self.cal_collision_limit(T, eqn)
                     rate_parameter = rxn['rate-constant']
                     kf = get_kf(rate_parameter, T)
@@ -595,7 +596,7 @@ class check_collision_violation(CheckNegativeA):
                         else:
                             violation_check[eqn] = {'forward violation factor': violation_factor, 'forward collision limit': collision_limit,
                                                 'forward rate coefficient': kf}
-                if len(products) == 2:
+                if len(products) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in products and '(+M)' not in products:
                     collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
                     equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
                     rate_parameter = rxn['rate-constant']
@@ -614,7 +615,7 @@ class check_collision_violation(CheckNegativeA):
             for eqn, arr_parameters in duplicate_rxns.items():
                 reactants = self.get_reactants(eqn)
                 products = self.get_products(eqn)
-                if len(reactants) == 2:
+                if len(reactants) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in reactants and '(+M)' not in reactants:
                     collision_limit = self.cal_collision_limit(T, eqn)
                     kf_list = []
                     for arr_parameter in arr_parameters[0]:
@@ -625,7 +626,7 @@ class check_collision_violation(CheckNegativeA):
                         violation_factor = kf_dup / collision_limit
                         violation_check[eqn] = {'type': 'duplicate reaction', 'forward violation factor': violation_factor, 'forward collision limit': collision_limit,
                                                 'forward rate coefficient': kf_dup}
-                if len(products) == 2:
+                if len(products) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in products and '(+M)' not in products:
                     collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
                     equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
                     for arr_parameter in arr_parameters[0]:
@@ -646,17 +647,17 @@ class check_collision_violation(CheckNegativeA):
             for eqn, arr_parameters in pdep_rxns.items():
                 reactants = self.get_reactants(eqn)
                 products = self.get_products(eqn)
-                if len(reactants) == 2:
+                if len(reactants) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in reactants and '(+M)' not in reactants:
                     collision_limit = self.cal_collision_limit(T, eqn)
-                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P / 1e5)
+                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
                     if kf_pdep > collision_limit:
                         violation_factor = kf_pdep / collision_limit
                         violation_check[eqn] = {'type': 'pressure dependent reaction', 'forward violation factor': violation_factor, 'collision limit': collision_limit,
                                                 'forward rate coefficient': kf_pdep}
-                if len(products) == 2:
+                if len(products) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in products and '(+M)' not in products:
                     collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
                     equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
-                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P / 1e5)
+                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
                     kr_pdep = kf_pdep / equilibrium_constant
                     if kr_pdep > collision_limit:
                         violation_factor = kr_pdep / collision_limit
@@ -671,17 +672,17 @@ class check_collision_violation(CheckNegativeA):
             for eqn, arr_parameters in duplicate_rxns_multi_P.items():
                 reactants = self.get_reactants(eqn)
                 products = self.get_products(eqn)
-                if len(reactants) == 2:
+                if len(reactants) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in reactants and '(+M)' not in reactants:
                     collision_limit = self.cal_collision_limit(T, eqn)
-                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P / 1e5)
+                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
                     if kf_pdep > collision_limit:
                         violation_factor = kf_pdep / collision_limit
                         violation_check[eqn] = {'type': 'duplicate pressure dependent reaction', 'forward violation factor': violation_factor, 'collision limit': collision_limit,
                                                 'forward rate coefficient': kf_pdep}
-                if len(products) == 2:
+                if len(products) == 2 and 'falloff' not in rxn.values() and 'three-body' not in rxn.values() and 'M' not in products and '(+M)' not in products:
                     collision_limit = self.cal_collision_limit(T, eqn, reverse=True)
                     equilibrium_constant = self.get_equilibrium_constant(reactants, products, T)
-                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P / 1e5)
+                    kf_pdep = self.cal_pdep_rate(arr_parameters, T, P)
                     kr_pdep = kf_pdep / equilibrium_constant
                     if kr_pdep > collision_limit:
                         violation_factor = kr_pdep / collision_limit
@@ -734,10 +735,35 @@ class check_collision_violation(CheckNegativeA):
                         kf = get_kf(arr_parameter, T)
                         k2_list.append(kf)
                     kf2 = sum(k2_list)
-            log_k_P = math.log(kf1) + (math.log(kf2) - math.log(kf1)) * (math.log(P / p1) / math.log(p2 / p1))
-            k_P = math.exp(log_k_P)
+            try:
+                log_k_P = math.log(kf1) + (math.log(kf2) - math.log(kf1)) * (math.log(P / p1) / math.log(p2 / p1))
+                k_P = math.exp(log_k_P)
+            except ValueError:
+                pass
             return k_P
         elif len(large_p) == 0:
-            raise ChemicalError('Pressure is too big')
+            parameters = arr_parameters[-1]
+            if len(parameters) == 1:
+                rate_parameters = parameters[0]
+                kf = get_kf(rate_parameters, T)
+                return kf
+            if len(parameters) > 1:
+                kf_list = []
+                for arr_parameter in arr_parameters:
+                    kf = get_kf(arr_parameter, T)
+                    kf_list.append(kf)
+                kf_sum = sum(kf_list)
+                return kf_sum
         elif len(small_p) == 0:
-            raise ChemicalError('Pressure is too small')
+            parameters = arr_parameters[0]
+            if len(parameters) == 1:
+                rate_parameters = parameters[0]
+                kf = get_kf(rate_parameters, T)
+                return kf
+            if len(parameters) > 1:
+                kf_list = []
+                for arr_parameter in arr_parameters:
+                    kf = get_kf(arr_parameter, T)
+                    kf_list.append(kf)
+                kf_sum = sum(kf_list)
+                return kf_sum
