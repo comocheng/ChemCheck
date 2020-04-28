@@ -9,6 +9,6 @@ dependencies:
   - django
   - cantera
   - pyyaml
-  - ruamel-yaml
+  - ruamel_yaml
   - matplotlib
   - numpy
