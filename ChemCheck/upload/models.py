@@ -32,6 +32,10 @@ class Mechanism(models.Model):
     ct_conversion_errors = models.TextField(verbose_name='Errors from the ck2yaml conversion')
     timestamps = models.DateTimeField(auto_now_add=True)
 
+    temperature = models.FloatField(null=True, blank=True)
+
+    pressure = models.FloatField(null=True, blank=True)
+
     def get_absolute_url(self):
         return 'uploads/{self.id}/'
     

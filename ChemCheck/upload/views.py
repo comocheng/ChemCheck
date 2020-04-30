@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, DetailView, View
-from .forms import ChemkinUpload
+from .forms import ChemkinUpload, ReactionCondition
 from .models import Mechanism
-from .chemcheck import ChemError, CheckNegativeA, err_line_without_comment
+from .chemcheck import ChemError, CheckNegativeA, err_line_without_comment, check_collision_violation
 from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
 import os
@@ -12,6 +12,7 @@ from django.urls import reverse_lazy
 from .ck2yaml import strip_nonascii
 import linecache
 from canteradebugger.settings import MEDIA_ROOT
+import sys
 
 # Create your views here.
 
@@ -342,3 +343,42 @@ def check_negative_dup_rxns_negative_A(request, pk):
         'dup_rxns_err_dict':dup_rxns_err_dict,
         'pdep_dup_err_dict':pdep_dup_err_dict
     })
+
+def reaction_condition(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    if request.method == 'POST':
+        form = ReactionCondition(request.POST)
+        if form.is_valid:
+            temperature = form['temperature'].value()
+            pressure = form['pressure'].value()
+            Mechanism.objects.filter(pk=pk).update(temperature=temperature)
+            Mechanism.objects.filter(pk=pk).update(pressure=pressure)
+            return HttpResponseRedirect('collision_violation')
+    else:
+        form = ReactionCondition()
+    return render(request, 'reaction_condition.html', {
+        'form': form
+    })
+
+def collision_violation_check(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    log = ''
+    violators = 0
+    T = mechanism.temperature
+    P = mechanism.pressure
+    path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+    try:
+        violators = check_collision_violation(path).check_collision_violation(T, P)
+    except:
+        error = "Unexpected error:" + str(sys.exc_info()[1])
+        log += error
+    if violators == 0:
+        return render(request, 'collision_violation.html', {
+            'log': log
+        })
+    else:
+        return render(request, 'collision_violation.html', {
+            'Temperature': T,
+            'Pressure': P,
+            'violators': violators,
+        })

@@ -15,5 +15,7 @@ urlpatterns = [
     path('mechanism/<int:pk>/update', views.MechanismUpdateView.as_view(), name='update_file_transport'),
     path('mechanism/<int:pk>/chemcheck', views.chemcheck, name='chemcheck'),
     path('mechanism/<int:pk>/pdep_negativeA', views.check_pdep_negative_A, name='check_pdep_negative_A'),
-    path('mechanism/<int:pk>/dup_negative_A', views.check_negative_dup_rxns_negative_A, name='check_negative_dup_rxns_negative_A')
+    path('mechanism/<int:pk>/dup_negative_A', views.check_negative_dup_rxns_negative_A, name='check_negative_dup_rxns_negative_A'),
+    path('mechanism/<int:pk>/reaction_condition', views.reaction_condition, name='reaction_condition'),
+    path('mechanism/<int:pk>/collision_violation', views.collision_violation_check, name='collision_violation')
 ]
