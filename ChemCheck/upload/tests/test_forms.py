@@ -1,7 +1,7 @@
 '''This file tests if the forms are valid.'''
 
 from django.test import TestCase
-from upload.forms import ChemkinUpload
+from upload.forms import ChemkinUpload, ReactionCondition
 from unittest import mock
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -25,3 +25,12 @@ class TestForms(TestCase):
                                     'ck_transport_file':"fake_file",
                                     'ck_surface_file':"fake_file"})
         self.assertTrue(form.is_valid())
+    
+    def test_reaction_condition_forms(self):
+        form = ReactionCondition(data={'temperature':298,
+                                        'pressure':1e5})
+        self.assertTrue(form.is_valid())
+
+        form = ReactionCondition(data={'temperature':99,
+                                        'pressure':1e5})
+        self.assertFalse(form.is_valid())
