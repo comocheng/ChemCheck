@@ -1,12 +1,8 @@
 from django.db import models
 from django.utils import timezone
 import datetime
-import yaml
-import math
-import numpy as np
-import matplotlib.pyplot as plt
 import os
-import linecache
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 # Create your models here.
@@ -32,9 +28,9 @@ class Mechanism(models.Model):
     ct_conversion_errors = models.TextField(verbose_name='Errors from the ck2yaml conversion')
     timestamps = models.DateTimeField(auto_now_add=True)
 
-    temperature = models.FloatField(null=True, blank=True)
+    temperature = models.FloatField(null=True, blank=True, default=298, validators=[MinValueValidator(100), MaxValueValidator(100000)])
 
-    pressure = models.FloatField(null=True, blank=True)
+    pressure = models.FloatField(null=True, blank=True, default=1e5)
 
     def get_absolute_url(self):
         return 'uploads/{self.id}/'
