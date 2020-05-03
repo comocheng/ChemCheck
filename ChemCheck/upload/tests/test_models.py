@@ -16,12 +16,16 @@ class MechanismTest(TestCase):
                                     ck_thermo_file=file_test,
                                     ck_transport_file=file_test,
                                     ck_surface_file=file_test,
-                                    ct_mechanism_file=file_test)
+                                    ct_mechanism_file=file_test,
+                                    temperature = 298,
+                                    pressure = 1e5)
         self.assertEqual(file_test.name, file_get_tested.ck_mechanism_file)
         self.assertEqual(file_test.name, file_get_tested.ck_thermo_file)
         self.assertEqual(file_test.name, file_get_tested.ck_transport_file)
         self.assertEqual(file_test.name, file_get_tested.ck_surface_file)
         self.assertEqual(file_test.name, file_get_tested.ct_mechanism_file)
+        self.assertEqual(298, file_get_tested.temperature)
+        self.assertEqual(1e5, file_get_tested.pressure)
 
 class MechDictTest(TestCase):
     def test_ffield(self):
