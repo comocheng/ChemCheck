@@ -102,5 +102,11 @@ class TestCheckViews(TestCase):
         self.assertEqual(get_collision_check_response.status_code, 200)
         path_mech = mech.ct_mechanism_file.path
         os.remove(path_mech)
+        folder_path = os.path.join(MEDIA_ROOT,'uploads/2/')
+        files_list = os.listdir(folder_path)
+        for f in files_list:
+            if f.endswith('.png'):
+                os.remove(os.path.join(folder_path, f))
+
         if len(os.listdir(os.path.join(MEDIA_ROOT,'uploads/2/'))) == 0:
             os.rmdir(os.path.join(MEDIA_ROOT,'uploads/2/'))
