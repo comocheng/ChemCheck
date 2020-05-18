@@ -113,7 +113,6 @@ class ChemError:
                 cp = [cp_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
                 h = [h_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
                 s = [s_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
-                print(species)
                 ax[0].plot(T,cp)
                 ax[0].set_title('$c_p/R$')
                 ax[1].plot(T,h)
