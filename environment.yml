@@ -12,3 +12,4 @@ dependencies:
   - ruamel_yaml
   - matplotlib
   - numpy
+  - bokeh
