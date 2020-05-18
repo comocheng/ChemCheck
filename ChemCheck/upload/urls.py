@@ -1,5 +1,17 @@
-from django.urls import path
+from django.urls import path, register_converter, re_path
 from upload import views
+
+# class CustomizedConverter:
+#     regex = '\d+'
+
+#     def to_python(self, value):
+#         return int(value)
+
+#     def to_url(self, value):
+#         return '%04d' % value
+
+# register_converter(CustomizedConverter, 'temperature')
+# register_converter(CustomizedConverter, 'pressure')
 
 urlpatterns = [
     path('home/', views.Home.as_view(), name='home'),
@@ -17,5 +29,6 @@ urlpatterns = [
     path('mechanism/<int:pk>/pdep_negativeA', views.check_pdep_negative_A, name='check_pdep_negative_A'),
     path('mechanism/<int:pk>/dup_negative_A', views.check_negative_dup_rxns_negative_A, name='check_negative_dup_rxns_negative_A'),
     path('mechanism/<int:pk>/reaction_condition', views.reaction_condition, name='reaction_condition'),
-    path('mechanism/<int:pk>/collision_violation', views.collision_violation_check, name='collision_violation')
+    path('mechanism/<int:pk>/collision_violation', views.collision_violation_check, name='collision_violation'),
+    path('mechanism/<int:pk>/collision_violation/bokeh_chart', views.bokeh_chart, name='bokeh_chart'),
 ]

@@ -5,14 +5,18 @@ from .models import Mechanism
 from .chemcheck import ChemError, CheckNegativeA, err_line_without_comment, check_collision_violation
 from django.http import HttpResponseRedirect, Http404
 from django.core.files.storage import FileSystemStorage
-import os
-import re
+import os, re, sys, linecache
 from django.core.files.base import File
 from django.urls import reverse_lazy
 from .ck2yaml import strip_nonascii
-import linecache
 from canteradebugger.settings import MEDIA_ROOT
-import sys
+import cantera as ct
+import numpy as np
+from bokeh.plotting import figure, ColumnDataSource
+from bokeh.embed import components
+from bokeh.models import CustomJS, Slider
+from bokeh.layouts import column, row
+
 
 # Create your views here.
 
@@ -382,3 +386,109 @@ def collision_violation_check(request, pk):
             'Pressure': P,
             'violators': violators,
         })
+
+
+
+def bokeh_chart(request, pk):
+    mechanism = get_object_or_404(Mechanism, pk=pk)
+    try:
+        kf_ = []
+        kr_ = []
+        path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
+        gas = ct.Solution(path)
+        T = mechanism.temperature
+        P = mechanism.pressure
+        gas.TP = T, P
+        kf = gas.forward_rate_constants
+        kr = gas.reverse_rate_constants
+        for i in range(len(kf)):
+            if kf[i] > 0:
+                kf_.append(kf[i])
+        for i in range(len(kr)):
+            if kr[i] > 0:
+                kr_.append(kr[i])
+        lgkf_min = np.log10(min(kf_))
+        lgkr_min = np.log10(min(kr_))
+        lgkf_max = np.log10(max(kf_))
+        lgkr_max = np.log10(max(kr_))
+        lgk_min = min([lgkf_min, lgkr_min, lgkf_max, lgkr_max])
+        lgk_max = max([lgkf_min, lgkr_min, lgkf_max, lgkr_max])
+        rxn_index = np.arange(len(kf)) + 1
+        reactions = gas.reactions()
+        for i in range(len(reactions)):
+            reactions[i] = str(reactions[i])
+        kf = np.log10(kf)
+        kr = np.log10(kr)
+        source = ColumnDataSource(data=dict(
+            x = rxn_index,
+            y1 = kf,
+            y2 = kr,
+            reaction = reactions,   
+        ))
+        TOOLTIPS = [
+            ("index", "@x"),
+            ("(x,y)", "($x, $y)"),
+            ("reaction", "@reaction")
+        ]
+        plot = figure(plot_width=600, plot_height=600, tooltips=TOOLTIPS,
+                    title="Reaction Rate Constants Check", x_axis_label="reaction index", 
+                    y_axis_label="logrithm of reaction rate constant(kmol/m^3.s)")
+        plot.scatter("x", "y1", color= "blue", source=source, legend_label="forward reaction rate constant")
+        plot.scatter("x", "y2", color = "red", source=source, legend_label="reverse reaction rate constant")
+        plot.legend.location = "top_left"
+        plot.legend.click_policy = "hide"
+
+        k_slider = Slider(start=lgk_min, end=lgk_max, value=lgk_min, step=0.1, title="reaction rate constant")
+        callback = CustomJS(args=dict(y_range=plot.y_range, source=source), code="""
+            const data = source['data'];
+            var start = cb_obj.value;
+            y_range.setv({"start": start});
+            const reactions = data['reaction'];
+            const kf = data['y1'];
+            const kr = data['y2'];
+            const index = data['x'];
+            var rxns_data = [];
+            for (var i = 0; i < index.length; i++){
+                if ( kf[i] >= start){
+                    var rxn = {};
+                    rxn["index"] = i + 1;
+                    rxn["reaction"] = reactions[i];
+                    if(rxns_data.includes(rxn) === false) {
+                        rxns_data.push(rxn)
+                    }                    
+                } else if (kr[i] >= start){
+                    var rxn = {};
+                    rxn["index"] = i + 1;
+                    rxn["reaction"] = reactions[i];
+                    if(rxns_data.includes(rxn) === false) {
+                        rxns_data.push(rxn)
+                    }   
+                };
+            };
+       //     document.getElementById("demo").innerHTML = JSON.stringify(rxns_data);
+            document.getElementById("table").innerHTML = "";
+            let table = document.querySelector("table");
+            let thead = table.createTHead();
+            let row = thead.insertRow();
+            for (var key in rxns_data[0]) {
+                let th = document.createElement("th");
+                let text = document.createTextNode(key);
+                th.appendChild(text);
+                row.appendChild(th);
+            }
+            for (var element of rxns_data){
+                let row_data = table.insertRow();
+                for (key in element){
+                    let cell = row_data.insertCell();
+                    let text_data = document.createTextNode(element[key]);
+                    cell.appendChild(text_data);
+                }
+            }
+        """)
+        k_slider.js_on_change('value', callback)
+        layout = column(plot, column(k_slider))
+        script, div = components(layout)
+    except:
+        error = "Unexpected error:" + str(sys.exc_info()[1])
+        raise Http404("error when loading the yaml file by Cantera: {}".format(error))
+    return render(request, 'bokeh_chart.html', {'script':script, 'div':div})
