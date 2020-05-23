@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import os
 import linecache
 import cantera as ct
+from bokeh.layouts import column, row
+from bokeh.plotting import figure, ColumnDataSource
 
 def cp_calculate(T, T_mid, Nasa_poly_low, Nasa_poly_high):
     """
@@ -90,7 +92,7 @@ class ChemError:
         for species in chem_data['species']:
             T_low = species['thermo']['temperature-ranges'][0]
             T_mid = species['thermo']['temperature-ranges'][1]
-            #T_high = species['thermo']['temperature-ranges'][2]
+            T_high = species['thermo']['temperature-ranges'][2]
             Nasa_poly_high = species['thermo']['data'][1]
             Nasa_poly_low = species['thermo']['data'][0]
             cp_low = Nasa_poly_low[0] + Nasa_poly_low[1] * T_mid + Nasa_poly_low[2] * T_mid ** 2 + Nasa_poly_low[3] * T_mid ** 3 + Nasa_poly_low[4] * T_mid ** 4
@@ -102,46 +104,29 @@ class ChemError:
             if abs(cp_high - cp_low) <= 0.1 and abs(h_low - h_high) <= 0.1 and abs(s_low - s_high) <= 0.1:
                 pass
             else:
-                image = '{}.png'.format(species['name'])
-                img_path = os.path.join(os.path.split(self.path)[0], image)
-                img_url = img_path.split('ChemCheck')[2]
-                discontinuous_species.append(img_url)
-                #gas = ct.Solution(self.path)
-                #sp = gas.species(species['name'])
-                T = np.linspace(T_low, 5000, 200)
-                fig,ax = plt.subplots(1,3,figsize=(8,3.5))
+                T = np.linspace(T_low, T_high, 200)
                 cp = [cp_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
                 h = [h_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
                 s = [s_calculate(tt, T_mid, Nasa_poly_low, Nasa_poly_high) for tt in T]
-                ax[0].plot(T,cp)
-                ax[0].set_title('$c_p/R$')
-                ax[1].plot(T,h)
-                ax[1].set_title('$h/RT$')
-                ax[2].plot(T,s)
-                ax[2].set_title('$s/R$')
-                fig.tight_layout()
-                fig.suptitle('{} thermo property'.format(species['name']), y=1)
-                fig.savefig(img_path)
-        return discontinuous_species
+                source = ColumnDataSource(data=dict(
+                            T=T,
+                            cp=cp,
+                            h=h,
+                            s=s,
+                        ))
+                TOOLTIPS = [
+                            ("(x,y)", "($x, $y)"),
+                        ]
 
-
-                # T_mid = symbols('x')
-                # cp_low = Nasa_poly_low[0] + Nasa_poly_low[1] * T_mid + Nasa_poly_low[2] * T_mid ** 2 + Nasa_poly_low[3] * T_mid ** 3 + Nasa_poly_low[4] * T_mid ** 4
-                # cp_high = Nasa_poly_high[0] + Nasa_poly_high[1] * T_mid + Nasa_poly_high[2] * T_mid ** 2 + Nasa_poly_high[3] * T_mid ** 3 + Nasa_poly_high[4] * T_mid ** 4
-                # h_low = Nasa_poly_low[0] + Nasa_poly_low[1] / 2 * T_mid + Nasa_poly_low[2] / 3 * T_mid ** 2 + Nasa_poly_low[3] / 4 * T_mid ** 3 + Nasa_poly_low[4] / 5 * T_mid ** 4 + Nasa_poly_low[5] / T_mid
-                # h_high = Nasa_poly_high[0] + Nasa_poly_high[1] / 2 * T_mid + Nasa_poly_high[2] / 3 * T_mid ** 2 + Nasa_poly_high[3] / 4 * T_mid ** 3 + Nasa_poly_high[4] / 5 * T_mid ** 4 + Nasa_poly_high[5] / T_mid
-                # s_low = Nasa_poly_low[0] * ln(T_mid) + Nasa_poly_low[1] * T_mid + Nasa_poly_low[2] / 2 * T_mid ** 2 + Nasa_poly_low[3] / 3 * T_mid ** 3 + Nasa_poly_low[4] / 4 * T_mid ** 4 + Nasa_poly_low[6]
-                # s_high = Nasa_poly_high[0] * ln(T_mid) + Nasa_poly_high[1] * T_mid + Nasa_poly_high[2] / 2 * T_mid ** 2 + Nasa_poly_high[3] / 3 * T_mid ** 3 + Nasa_poly_high[4] / 4 * T_mid ** 4 + Nasa_poly_high[6]
-                # T_cp = solveset(Abs(cp_high - cp_low) < 1, T_mid, domain=S.Reals)
-                # T_h = solveset(Abs(h_high - h_low) < 1, T_mid, domain=S.Reals)
-                # T_s = solveset(Abs(s_high - s_low) < 1, T_mid, domain=S.Reals)
-                # T_range = Interval(T_low, T_high)
-                # T_continuous = T_cp.intersect(T_h).intersect(T_s).intersect(T_range)
-                # T_continuouse = str(T_continuous)[str(T_continuous).find('Interval'):len(str(T_continuous))]
-                # if not T_continuouse:
-                #     print(species['name'])
-                # else:
-                #     print(species['name'], T_continuouse)
+                s1 = figure(title="{} Cp/R".format(species['name']), plot_width=250, plot_height=250, background_fill_color="#fafafa", tooltips=TOOLTIPS)
+                s2 = figure(title="{} h/RT".format(species['name']), plot_width=250, plot_height=250, background_fill_color="#fafafa", tooltips=TOOLTIPS)
+                s3 = figure(title="{} s/R".format(species['name']), plot_width=250, plot_height=250, background_fill_color="#fafafa", tooltips=TOOLTIPS)
+                s1.line(x='T', y='cp', color="#53777a", line_width=2, source=source)
+                s2.line(x='T', y='h', color="#53777a", line_width=2, source=source)
+                s3.line(x='T', y='s', color="#53777a", line_width=2, source=source)
+                thermo_plot = [s1, s2, s3]
+                discontinuous_species.append(thermo_plot)    
+        return discontinuous_species           
 
 def err_line_without_comment(path, line_num):
     """
