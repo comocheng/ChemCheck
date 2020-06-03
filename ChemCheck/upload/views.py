@@ -3,7 +3,7 @@ from django.views.generic import TemplateView, DetailView, View
 from .forms import ChemkinUpload, ReactionCondition
 from .models import Mechanism
 from .chemcheck import ChemError, CheckNegativeA, err_line_without_comment, check_collision_violation
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, request
 from django.core.files.storage import FileSystemStorage
 import os, re, sys, linecache
 from django.core.files.base import File
@@ -15,7 +15,7 @@ import numpy as np
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.embed import components
 from bokeh.models import CustomJS, Slider
-from bokeh.layouts import column, row
+from bokeh.layouts import column, row, layout
 
 
 # Create your views here.
@@ -68,6 +68,7 @@ def ck2yaml(request, pk):
                         quiet = False,
                         permissive = True,
                         )
+        ct.Solution(out_name)
     except Exception as e:
         with open(error_filename, "r") as err:
             content = err.read()
@@ -196,7 +197,12 @@ def ace(request, pk, filetype):
         'content': content,
         'mechanism': mechanism,
         'filename': filename,
+        'filetype':filetype,
         })
+def ace_save(request, pk, filetype):
+    contents = request.body.decode("utf-8")
+    print(contents)
+    return HttpResponseRedirect("/mechanism/{}/ace/{}".format(pk, filetype))
 
 def mechanisms_list(request):
     mechanisms = Mechanism.objects.all()
@@ -310,10 +316,13 @@ def chemcheck(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
     name = 'cantera'
-    species_name = ChemError(path, name).check_continuity()
-    return render(request, 'chemcheck.html', {
-        'species_name':species_name
-    })
+    species_plots = ChemError(path, name).check_continuity()
+    if len(species_plots) == 0:
+        return render(request, 'chemcheck.html')
+    else: 
+        l = layout(species_plots)
+        script, div = components(l)
+        return render(request, 'chemcheck1.html', {'script':script, 'div':div})
 
 def check_pdep_negative_A(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
