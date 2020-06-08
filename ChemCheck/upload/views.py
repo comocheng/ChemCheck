@@ -381,9 +381,9 @@ def collision_violation_check(request, pk):
     P = mechanism.pressure
     path = os.path.join(MEDIA_ROOT,'uploads/',str(mechanism.pk),'cantera.yaml')
     try:
-        violators = check_collision_violation(path).check_collision_violation(T, P)
-    except:
-        error = "Unexpected error:" + str(sys.exc_info()[1])
+        violators = check_collision_violation(path,T, P).check_collision_violation()
+    except Exception as e:
+        error = "Unexpected error:" + str(e)
         log += error
     if violators == 0:
         return render(request, 'collision_violation.html', {
