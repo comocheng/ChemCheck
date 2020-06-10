@@ -19,20 +19,19 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'upload:home' %}">Home</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'upload:upload' %}">Simple Upload</a>
-          </li>
+          {% block list %}
+          {% endblock %}
           <li class="nav-item">
             <a class="nav-link" href="{% url 'password_change' %}">Change Password</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'login' %}">
-                <button class="btn btn-primary btn-sm">Log In</button>
+                Log In
             </a>
           </li> 
           <li class="nav-item">
             <a class="nav-link" href="/accounts/logout/">
-              <button class="btn btn-primary btn-sm" type="submit">Log Out</button>
+              Log Out
             </a>
             </form>
           </li> 

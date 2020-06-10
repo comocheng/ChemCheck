@@ -2,7 +2,14 @@
 
 {% block content %}
 
-<h1>Log in</h1>
+<h1>Log In</h1>
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 
 <form class='login-form' method='POST'>
     {% csrf_token %}
@@ -10,4 +17,5 @@
     <button type="submit" class="btn btn-primary btn-sm">Login</button>
 </form>
 <p><a href="{% url 'accounts:signup' %}">Sign Up</a></p>
+<p><a href="/accounts/password_reset"}>Forgot Password</a></p>
 {% endblock %}

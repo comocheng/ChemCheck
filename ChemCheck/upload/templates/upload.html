@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
-
+{% block list %}
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'upload:upload' user.username %}">Simple Upload</a>
+</li>
+{% endblock %}
 {% block content %}
   <h2>Upload your files here</h2>
   <form method="post" enctype="multipart/form-data">

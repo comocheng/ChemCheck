@@ -9,15 +9,16 @@ import re
 from django.core.files.base import File
 from django.urls import reverse_lazy
 from .ck2yaml import strip_nonascii
-
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 # Create your views here.
-
 class Home(TemplateView):
     template_name = 'home.html'
-   
 
-def upload(request):
+@login_required
+def upload(request, username):
+    user = User.objects.get(username=username)
     if request.method == 'POST':
         form = ChemkinUpload(request.POST, request.FILES)
         if form.is_valid:
@@ -26,7 +27,8 @@ def upload(request):
     else:
         form = ChemkinUpload()
     return render(request, 'upload.html', {
-        'form': form
+        'form': form,
+        'user':user
     })
 
 def ck2yaml(request, pk):
