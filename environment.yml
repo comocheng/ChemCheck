@@ -13,3 +13,4 @@ dependencies:
   - matplotlib
   - numpy
   - bokeh
+  - django-crispy-forms
