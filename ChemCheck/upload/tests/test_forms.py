@@ -1,24 +1,25 @@
 '''This file tests if the forms are valid.'''
 
-from django.test import TestCase
+from django.test import TestCase, Client
 from upload.forms import ChemkinUpload, ReactionCondition
 from unittest import mock
 from django.core.files.uploadedfile import SimpleUploadedFile
-
+from accounts.forms import SignupForm
 class SetupForms(TestCase):
     def Setup(self):
         fake_file = SimpleUploadedFile(
             'test-file.txt',
-            'this is what\'s in the file that isn\'t a file'.encode(),
+            'this is a test'.encode(),
             content_type='test/plain')
-        self.mech = Mechanism.objects.create(
-            id=3,
-            ck_mechanism_file=fake_file,
-            ck_thermo_file=fake_file,
-            ck_transport_file=fake_file,
-            ck_surface_file=fake_file
-            )
 class TestForms(TestCase):
+    def test_signup(self):
+        form =  SignupForm(data={'username':'testuser',
+                                 'email':'testuser@gmail.com',
+                                 'password1':'Ab89898980',
+                                 'password2':'Ab89898980'})
+        self.assertTrue(form.is_valid())
+        form.save()
+        Client().login(username='testuser', password='Ab89898980') 
     def test_forms(self):
         form = ChemkinUpload(data={'ck_mechanism_file':"fake_file",
                                     'ck_thermo_file':"fake_file",
