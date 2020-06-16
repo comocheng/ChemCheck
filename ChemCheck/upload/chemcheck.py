@@ -329,7 +329,7 @@ class check_collision_violation:
         if len(species_dict) == 1 and list(species_dict.values())[0] == 2:
             index = self.species[list(species_dict.keys())[0]]
             m = self.gas.molecular_weights[index]
-            reduced_mass = m ** 2 / (2 * m)
+            reduced_mass = m / 2
             epsilon *= self.gas.species()[index].transport.well_depth
             sigma += self.gas.species()[index].transport.diameter
             return reduced_mass, epsilon, sigma
