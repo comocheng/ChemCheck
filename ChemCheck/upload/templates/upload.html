@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
+{% block list %}
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'upload:upload' user.username %}">Simple Upload</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'upload:list' user.username %}">File List</a>
+</li>
+{% endblock %}
 
 {% block content %}
   <h2>Upload your files here</h2>

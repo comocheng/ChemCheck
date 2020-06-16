@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block card %}{% endblock %}
-
+{% block list %}
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'upload:upload' user.username %}">Simple Upload</a>
+</li>
+{% endblock %}
 {% block content %}
 <table class="table table-striped">
   <thead>
@@ -16,9 +20,9 @@
   <tbody>
     {% for mech in mechanisms %}
       <tr>
-        <td>{{ mech.id }}</td>
+        <td> {{ forloop.counter }} {{ j }}</td>
           <td>
-            <a href="/mechanism/{{ mech.id }}">
+            <a href="/{{ username }}/mechanism/{{ mech.id }}">
               <button type="button" class="btn btn-primary btn-sm">Details</button>
             </a>
           </td>
@@ -57,7 +61,7 @@
 </table>
 
 
-<a href="/upload/">
+<a href="/{{ username }}/upload/">
   <button type="button" class="btn btn-primary btn-sm">Upload new mechanism</button>
 </a>
 

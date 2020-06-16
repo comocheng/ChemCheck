@@ -3,18 +3,23 @@ from django.utils import timezone
 import datetime
 import os
 from django.core.validators import MaxValueValidator, MinValueValidator
-
+from django.conf import settings
+from django.contrib.auth import get_user_model
 
 # Create your models here.
+def get_sentinel_user():
+    return get_user_model().objects.get_or_create(username='deleted')[0]
 
 def upload_to(instance, filename):
-    return 'uploads/{id}/{fn}'.format(id=instance.pk,fn=filename)
+    return 'uploads/{uname}/{id}/{fn}'.format(uname=instance.user.username,id=instance.pk, fn=filename)
 
 
 class Mechanism(models.Model):
     """
     A chemical kinetic mechanism, from Chemkin or Cantera
     """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET(get_sentinel_user))
+
     ck_mechanism_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
                                        verbose_name="Chemkin mechanism file")
     ck_thermo_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
@@ -32,8 +37,8 @@ class Mechanism(models.Model):
 
     pressure = models.FloatField(null=True, blank=True, default=1e5)
 
-    def get_absolute_url(self):
-        return 'uploads/{self.id}/'
+    # def get_absolute_url(self):
+    #     return 'uploads/{self.id}/'
     
 
 
