@@ -14,28 +14,28 @@
 {% if mech.ct_mechanism_file %}
 <br>
 Cantera YAML file: 
-<a href="/media/uploads/{{ mech.id }}/cantera.yaml">
+<a href="{{ mech.ct_mechanism_file.url }}">
     <button type="button" >View</button>
 </a>
 {% load static %}
-<a href="/media/uploads/{{ mech.id }}/cantera.yaml" download>
+<a href="{{ mech.ct_mechanism_file.url }}" download>
     <button type="button"> Download</button>
 </a>
-<a href="/{{ mech.user.username }}/mechanism/{{ mech.id }}/chemcheck">
+<a href="{% url 'upload:chemcheck' mech.id %}">
     <button type="button">Check Chemistry</button>
 </a>
-<a href="/{{ mech.user.username }}/mechanism/{{ mech.id }}/pdep_negativeA">
+<a href="{% url 'upload:check_pdep_negative_A' mech.id %}">
     <button type="button">Check pdep</button>
 </a>
-<a href="/{{ mech.user.username }}/mechanism/{{ mech.id }}/dup_negative_A">
+<a href="{% url 'upload:check_negative_dup_rxns_negative_A' mech.id %}">
     <button type="button">Check duplicate reaction</button>
 </a>
-<a href="/{{ mech.user.username }}/mechanism/{{ mech.id }}/reaction_condition">
+<a href="{% url 'upload:reaction_condition' mech.id %}">
     <button type="button">Collision Violation Check</button>
 </a>
 {% endif %}
 
 </br>
-<p><a href="/{{ mech.user.username }}/mechanism/{{ mech.id }} ">Back to mechanism details</a></p>
+<p><a href="{% url 'upload:mechanism_detail' mech.id%} ">Back to mechanism details</a></p>
 
 {% endblock %}

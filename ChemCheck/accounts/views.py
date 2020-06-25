@@ -6,6 +6,7 @@ from .forms import SignupForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
 # Create your views here.
 
 def signup_view(request):
@@ -38,7 +39,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.info(request, f"You are now logged in as {username}")
-                return HttpResponseRedirect('/{}/upload'.format(username))
+                return HttpResponseRedirect(reverse_lazy('upload:upload'))
             else:
                 messages.error(request, "Invalid username or password.")
         else:

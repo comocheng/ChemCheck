@@ -1,9 +1,4 @@
 {% extends 'base.html' %}
-{% block list %}
-<li class="nav-item">
-  <a class="nav-link" href="/{{ object.user.username }}/list">Simple Upload</a>
-</li>
-{% endblock %}
 
 {% block content %}
 <h1>Mechanism {{ object.id }} details</h1>
@@ -22,7 +17,7 @@
             <a href="ace/mechanism">
               <button type="button" class="btn btn-primary btn-sm">Edit</button>
             </a>
-            <a href="delete_mechanism">
+            <a href="{% url 'upload:delete_file' object.id %}">
               <button type="button" class="btn btn-danger btn-sm">Delete</button>
             </a>
           {% else %}
@@ -70,13 +65,13 @@
           </li>
         </ul>
 
-<a href="/{{ object.user.username }}/ck2yaml/{{ object.id }}">
+<a href="{% url 'upload:ck2yaml' object.id %}">
   <button type="button" class="btn btn-primary btn-sm">Convert to YAML</button>
 </a>
-<a href="update">
+<a href="{% url 'upload:update_file' object.id %}">
   <button type="button" class="btn btn-primary btn-sm">Update Files</button>
 </a>
 
-<p><a href="/{{ object.user.username }}/list/">Back to mechanism list</a></p>
+<p><a href="{% url 'upload:list' %}">Back to mechanism list</a></p>
 
 {% endblock %}

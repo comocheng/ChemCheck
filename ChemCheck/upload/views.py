@@ -26,23 +26,24 @@ class Home(TemplateView):
     template_name = 'home.html'
    
 @login_required
-def upload(request, username):
+def upload(request):
+    # if username != request.user.username:
+    #     raise Http404('You are not logged in with this account!')
     if request.method == 'POST':
         form = ChemkinUpload(request.POST, request.FILES, request.user)
         if form.is_valid:
             files = form.save(commit=False)
             files.user = request.user
             form.save()
-            return HttpResponseRedirect('/{}/list/'.format(request.user.username))
+            return HttpResponseRedirect(reverse_lazy('upload:list'))
     else:
         form = ChemkinUpload()
     return render(request, 'upload.html', {
         'form': form,
-        'username':username,
     })
 
 @login_required
-def ck2yaml(request, pk, username):
+def ck2yaml(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -175,23 +176,26 @@ def ck2yaml(request, pk, username):
     'suggestion': suggestion
     })
 
-# @method_decorator(login_required, name='dispatch')
-# class MechanismDetailView(DetailView):
-#     model = Mechanism
-
 @login_required
-def mechanism_detail(request, username, pk):
+def mechanism_detail(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
+    mech_name = mechanism.ck_mechanism_file.name.split('/')[-1]
+    therm_name = mechanism.ck_thermo_file.name.split('/')[-1]
+    trans_name = mechanism.ck_transport_file.name.split('/')[-1]
+    surf_name = mechanism.ck_surface_file.name.split('/')[-1]
     return render(request, 'upload/mechanism_detail.html', {
-                    'object':mechanism,
-                    'usename': request.user.username})
+                  'object':mechanism,
+                  'mech_name':mech_name,
+                  'therm_name':therm_name,
+                  'trans_name':trans_name,
+                  'surf_name':surf_name})
 
 
 
 @login_required   
-def ace(request,username, pk, filetype):
+def ace(request, pk, filetype):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -217,16 +221,14 @@ def ace(request,username, pk, filetype):
         'mechanism': mechanism,
         'filename': filename,
         'filetype':filetype,
-        'username':username,
         })
 
 @login_required
-def mechanisms_list(request, username):
+def mechanisms_list(request):
     user_id = request.user.id
     mechanisms = Mechanism.objects.filter(user=user_id)
     return render(request, 'list.html', {
        'mechanisms': mechanisms,
-       'username': username
     })
     
 class MechanismObjectMixin(object):
@@ -260,7 +262,7 @@ class MechanismDeleteView(MechanismObjectMixin, View):
             mech.delete()
             context['object'] = None
             username = request.user.username
-            return HttpResponseRedirect('/{}/list/'.format(username))
+            return HttpResponseRedirect(reverse_lazy('upload:list'))
         return render(request, self.template_name, context)
 
 @method_decorator(login_required, name='dispatch')
@@ -285,7 +287,7 @@ class MechanismthermoDeleteView(MechanismObjectMixin, View):
             thermo.delete()
             context['object'] = None
             username = request.user.username
-            return HttpResponseRedirect('/{}/list/'.format(username))
+            return HttpResponseRedirect(reverse_lazy('upload:list'))
         return render(request, self.template_name, context)
 
 @method_decorator(login_required, name='dispatch')
@@ -310,7 +312,7 @@ class MechanismtransportDeleteView(MechanismObjectMixin, View):
             transport.delete()
             context['object'] = None
             username = request.user.username
-            return HttpResponseRedirect('/{}/list/'.format(username))
+            return HttpResponseRedirect(reverse_lazy('upload:list'))
         return render(request, self.template_name, context)
 
 @method_decorator(login_required, name='dispatch')
@@ -335,7 +337,7 @@ class MechanismsurfaceDeleteView(MechanismObjectMixin, View):
             surface.delete()
             context['object'] = None
             uername = request.user.username
-            return HttpResponseRedirect('/username/list/')
+            return HttpResponseRedirect(reverse_lazy('upload:list'))
         return render(request, self.template_name, context)
 
 @method_decorator(login_required, name='dispatch')
@@ -384,11 +386,10 @@ class MechanismUpdateView(MechanismObjectMixin, View):
                 if surface_update == False or surface_update != surface.name:
                     os.remove(surface_path)
             form.save()
-            url = '/{}/mechanism/{}'.format(request.user.username, obj.pk)
-            return HttpResponseRedirect(url)
+            return HttpResponseRedirect(reverse_lazy('upload:mechanism_detail', args=[obj.id]))
 
 @login_required
-def chemcheck(request, pk, username):
+def chemcheck(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -403,7 +404,7 @@ def chemcheck(request, pk, username):
         return render(request, 'chemcheck1.html', {'script':script, 'div':div})
 
 @login_required
-def check_pdep_negative_A(request, pk, username):
+def check_pdep_negative_A(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -421,7 +422,7 @@ def check_pdep_negative_A(request, pk, username):
     })
 
 @login_required
-def check_negative_dup_rxns_negative_A(request, pk, username):
+def check_negative_dup_rxns_negative_A(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -442,7 +443,7 @@ def check_negative_dup_rxns_negative_A(request, pk, username):
     })
 
 @login_required
-def reaction_condition(request, pk, username):
+def reaction_condition(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -458,7 +459,7 @@ def reaction_condition(request, pk, username):
     })
 
 @login_required
-def collision_violation_check(request, pk, username):
+def collision_violation_check(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -471,20 +472,22 @@ def collision_violation_check(request, pk, username):
         violators = check_collision_violation(path,T, P).check_collision_violation()
     except Exception as e:
         error = "Unexpected error:" + str(e)
+        print(e)
         log += error
     if violators == 0:
         return render(request, 'collision_violation.html', {
             'log': log
-        })
+        })        
     else:
         return render(request, 'collision_violation.html', {
             'Temperature': T,
             'Pressure': P,
             'violators': violators,
+            'mechanism': mechanism
         })
 
 @login_required
-def bokeh_chart(request, pk, username):
+def bokeh_chart(request, pk):
     mechanism = get_object_or_404(Mechanism, pk=pk)
     if mechanism.user != request.user or request.user.is_authenticated == False:
         raise Http404('You do not have the access to this file!')
@@ -588,4 +591,4 @@ def bokeh_chart(request, pk, username):
     except:
         error = "Unexpected error:" + str(sys.exc_info()[1])
         raise Http404("error when loading the yaml file by Cantera: {}".format(error))
-    return render(request, 'bokeh_chart.html', {'script':script, 'div':div})
+    return render(request, 'bokeh_chart.html', {'script':script, 'div':div, 'mechanism':mechanism})
