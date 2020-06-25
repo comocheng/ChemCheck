@@ -20,7 +20,7 @@ class TestViews(TestCase):
             'test-file.txt',
             'this is what\'s in the file that isn\'t a file'.encode(),
             content_type='text/plain')
-        post_response = self.client.post(reverse_lazy('upload:upload', args=['testuser']),{
+        post_response = self.client.post(reverse_lazy('upload:upload'),{
                         'ck_mechanism_file':fake_file
         })
         post_file_path = str(Mechanism.objects.get(id=1).ck_mechanism_file)
@@ -28,12 +28,12 @@ class TestViews(TestCase):
         self.assertEquals(post_response.status_code, 302)
     
     #start of detail view test
-        get_response = self.client.get(reverse_lazy('upload:mechanism_detail', args=['testuser', 1]))
+        get_response = self.client.get(reverse_lazy('upload:mechanism_detail', args=[1]))
         self.assertEquals(get_response.status_code, 200)
         self.assertTemplateUsed(get_response, 'upload/mechanism_detail.html', 'base.html')
     
     #start of ck2yaml view test
-        ck2yaml_response = self.client.get(reverse_lazy('upload:ck2yaml', args=['testuser', 1]))
+        ck2yaml_response = self.client.get(reverse_lazy('upload:ck2yaml', args=[1]))
         self.assertEqual(ck2yaml_response.status_code, 200)
         self.assertTemplateUsed(ck2yaml_response, 'ck2yaml.html', 'base.html')
         self.assertTrue(os.path.isfile(str(MEDIA_ROOT)+'/uploads/testuser/1/error.txt'))
@@ -44,11 +44,11 @@ class TestViews(TestCase):
             'Only test'.encode(),
             content_type='test/plain'
         )
-        update_get_response = self.client.get(reverse_lazy('upload:update_file_transport', args=['testuser', 1]))
+        update_get_response = self.client.get(reverse_lazy('upload:update_file', args=[1]))
         self.assertEquals(update_get_response.status_code, 200)
         self.assertTemplateUsed(update_get_response, 'base.html', 'file_update.html')
 
-        update_post_response = self.client.post(reverse_lazy('upload:update_file_transport', args=['testuser', 1]), {
+        update_post_response = self.client.post(reverse_lazy('upload:update_file', args=[1]), {
             'ck_mechanism_file':update_file
         })
         update_path = str(Mechanism.objects.get(id=1).ck_mechanism_file.path)
@@ -56,11 +56,11 @@ class TestViews(TestCase):
         self.assertEquals(os.path.split(update_path)[1], 'update-file.txt')
     
     #start of delete view test
-        delete_get_response = self.client.get(reverse_lazy('upload:delete_file', args=['testuser', 1]))
+        delete_get_response = self.client.get(reverse_lazy('upload:delete_file', args=[1]))
         self.assertEquals(delete_get_response.status_code, 200)
         self.assertTemplateUsed(delete_get_response, 'base.html', 'file_delete_mechanism.html')
         
-        delete_post_response = self.client.post(reverse_lazy('upload:delete_file', args=['testuser', 1]))
+        delete_post_response = self.client.post(reverse_lazy('upload:delete_file', args=[1]))
         self.assertEquals(delete_post_response.status_code, 302)
         self.assertFalse(Mechanism.objects.get(id=1).ck_mechanism_file)
         self.assertFalse(os.path.isfile(str(MEDIA_ROOT)+'/uploads/testuser/1/update-file.txt'))
@@ -75,24 +75,24 @@ class TestViews(TestCase):
                                         id=2,
                                         ct_mechanism_file=test_file
                                         )
-        chemcheck_get_response = self.client.get(reverse_lazy('upload:chemcheck', args=['testuser', 2]))
+        chemcheck_get_response = self.client.get(reverse_lazy('upload:chemcheck', args=[2]))
         self.assertEqual(chemcheck_get_response.status_code, 200)
     
     # start of pdep negative A test
-        get_pdep_neg_A_response = self.client.get(reverse_lazy('upload:check_pdep_negative_A',  args=['testuser', 2]))
+        get_pdep_neg_A_response = self.client.get(reverse_lazy('upload:check_pdep_negative_A',  args=[2]))
         self.assertEqual(get_pdep_neg_A_response.status_code, 200)
        
     
     # start of duplicate reaction negative A test
-        get_dup_neg_A_response = self.client.get(reverse_lazy('upload:check_negative_dup_rxns_negative_A',  args=['testuser', 2]))
+        get_dup_neg_A_response = self.client.get(reverse_lazy('upload:check_negative_dup_rxns_negative_A',  args=[2]))
         self.assertEqual(get_dup_neg_A_response.status_code, 200)
     
     # start of reaction condition test
-        get_rxn_condition_response = self.client.get(reverse_lazy('upload:reaction_condition',  args=['testuser', 2]))
+        get_rxn_condition_response = self.client.get(reverse_lazy('upload:reaction_condition',  args=[2]))
         self.assertEqual(get_rxn_condition_response.status_code, 200)
     
     # start of collision violation check test
-        get_collision_check_response = self.client.get(reverse_lazy('upload:collision_violation',  args=['testuser', 2]))
+        get_collision_check_response = self.client.get(reverse_lazy('upload:collision_violation',  args=[2]))
         self.assertEqual(get_collision_check_response.status_code, 200)
         path_mech = mech.ct_mechanism_file.path
         os.remove(path_mech)
