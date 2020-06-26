@@ -5,20 +5,27 @@ import os
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 # Create your models here.
 def get_sentinel_user():
-    return get_user_model().objects.get_or_create(username='deleted')[0]
+    return get_user_model().objects.get_or_create(username='delete')[0]
 
 def upload_to(instance, filename):
     return 'uploads/{uname}/{id}/{fn}'.format(uname=instance.user.username,id=instance.pk, fn=filename)
 
-
+def get_default_user():
+    try:
+        user = User.objects.get(username='defaultuser')
+    except ObjectDoesNotExist as DoesNotExist:
+        user = User.objects.create_user('defaultuser', 'default@gmail.com', 'default000')
+    return user.id
 class Mechanism(models.Model):
     """
     A chemical kinetic mechanism, from Chemkin or Cantera
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET(get_sentinel_user), null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET(get_sentinel_user), default=get_default_user(),
+                            editable=False)
 
     ck_mechanism_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
                                        verbose_name="Chemkin mechanism file")
