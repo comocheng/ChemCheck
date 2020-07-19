@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block card %}{% endblock %}
-
+{% block list %}
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'upload:upload' %}">Simple Upload</a>
+</li>
+{% endblock %}
 {% block content %}
 <table class="table table-striped">
   <thead>
@@ -16,36 +20,36 @@
   <tbody>
     {% for mech in mechanisms %}
       <tr>
-        <td>{{ mech.id }}</td>
+        <td> {{ forloop.counter }} {{ j }}</td>
           <td>
-            <a href="/mechanism/{{ mech.id }}">
+            <a href="{% url 'upload:mechanism_detail' mech.id %}">
               <button type="button" class="btn btn-primary btn-sm">Details</button>
             </a>
           </td>
         <td>
           {% if mech.ck_mechanism_file %}
-            <a href="{{ mech.ck_mechanism_file.url }}">{{ mech.ck_mechanism_file.name }}</a>
+            <a href="{{ mech.ck_mechanism_file.url }}"><p class="mechanism">{{ mech.ck_mechanism_file.name }}</p></a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %} 
         </td>
         <td>
           {% if mech.ck_thermo_file %}
-          <a href="{{ mech.ck_thermo_file.url }}">{{ mech.ck_thermo_file }}</a>
+          <a href="{{ mech.ck_thermo_file.url }}"><p class="thermo">{{ mech.ck_thermo_file.name }}</p></a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
         </td>
         <td>
           {% if mech.ck_transport_file %}
-          <a href="{{ mech.ck_transport_file.url }}">{{ mech.ck_transport_file }}</a>
+          <a href="{{ mech.ck_transport_file.url }}"><p class="transport">{{ mech.ck_transport_file.name }}</p></a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
         </td>
         <td>
           {% if mech.ck_surface_file %}
-          <a href="{{ mech.ck_surface_file.url }}">{{ mech.ck_surface_file }}</a>
+          <a href="{{ mech.ck_surface_file.url }}"><p class="surface">{{ mech.ck_surface_file.name }}</p></a>
           {% else %}
             <span class="text-muted">No File Attached</span>
           {% endif %}  
@@ -57,9 +61,34 @@
 </table>
 
 
-<a href="/upload/">
+<a href="{% url 'upload:upload' %}">
   <button type="button" class="btn btn-primary btn-sm">Upload new mechanism</button>
 </a>
 
+<script>
+var elements = document.getElementsByClassName("mechanism");
+for(var i=0; i<elements.length; i++){
+    var text = elements[i].textContent;
+    elements[i].innerHTML = text.replace(/.*\//, '');
+}
+var elements = document.getElementsByClassName("thermo");
+for(var i=0; i<elements.length; i++){
+    var text = elements[i].textContent;
+    elements[i].innerHTML = text.replace(/.*\//, '');
+}
 
+var elements = document.getElementsByClassName("transport");
+for(var i=0; i<elements.length; i++){
+    var text = elements[i].textContent;
+    elements[i].innerHTML = text.replace(/.*\//, '');
+}
+
+var elements = document.getElementsByClassName("surface");
+for(var i=0; i<elements.length; i++){
+    var text = elements[i].textContent;
+    elements[i].innerHTML = text.replace(/.*\//, '');
+}
+
+
+</script>
 {% endblock %}

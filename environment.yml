@@ -1,0 +1,16 @@
+name: chemcheck_env
+channels:
+  - defaults
+  - conda-forge
+  - cantera/label/dev
+  - anaconda
+dependencies:
+  - python = 3.8
+  - django
+  - cantera
+  - pyyaml
+  - ruamel_yaml
+  - matplotlib
+  - numpy
+  - bokeh
+  - django-crispy-forms

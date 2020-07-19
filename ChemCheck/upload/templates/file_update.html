@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Update: {{object.pk }}</h1>
+<h1>Update: {{object.user.username}}</h1>
 
 <form action='update' method='POST' enctype="multipart/form-data">{% csrf_token %}
     {{ form.as_p }}

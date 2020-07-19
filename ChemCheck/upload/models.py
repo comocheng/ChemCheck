@@ -1,24 +1,32 @@
 from django.db import models
 from django.utils import timezone
 import datetime
-import yaml
-import math
-import numpy as np
-import matplotlib.pyplot as plt
 import os
-import linecache
-
-
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 # Create your models here.
+def get_sentinel_user():
+    return get_user_model().objects.get_or_create(username='delete')[0]
 
 def upload_to(instance, filename):
-    return 'uploads/{id}/{fn}'.format(id=instance.pk,fn=filename)
+    return 'uploads/{uname}/{id}/{fn}'.format(uname=instance.user.username,id=instance.pk, fn=filename)
 
-
+def get_default_user():
+    try:
+        user = User.objects.get(username='defaultuser')
+    except ObjectDoesNotExist as DoesNotExist:
+        user = User.objects.create_user('defaultuser', 'default@gmail.com', 'default000')
+    return user.id
 class Mechanism(models.Model):
     """
     A chemical kinetic mechanism, from Chemkin or Cantera
     """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET(get_sentinel_user), default=get_default_user(),
+                            editable=False)
+
     ck_mechanism_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
                                        verbose_name="Chemkin mechanism file")
     ck_thermo_file = models.FileField(upload_to=upload_to, max_length=100, blank=True, null=True,
@@ -32,8 +40,12 @@ class Mechanism(models.Model):
     ct_conversion_errors = models.TextField(verbose_name='Errors from the ck2yaml conversion')
     timestamps = models.DateTimeField(auto_now_add=True)
 
-    def get_absolute_url(self):
-        return 'uploads/{self.id}/'
+    temperature = models.FloatField(null=True, blank=True, default=298, validators=[MinValueValidator(100), MaxValueValidator(100000)])
+
+    pressure = models.FloatField(null=True, blank=True, default=1e5)
+
+    # def get_absolute_url(self):
+    #     return 'uploads/{self.id}/'
     
 
 

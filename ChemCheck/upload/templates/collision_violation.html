@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if log %}
+{{ log }}
+{% endif %}
+{% if violators %}
+{% if violators|length > 0 %} 
+<p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;"> Reaction Condition: {{ Temperature }} K, {{ Pressure }} Pa </font></p>
+{% for eqn, value in violators.items %}
+<ul>
+    <li>
+        {{ eqn }}:
+        {% for key, value in value.items %}
+        <ul>
+            <li>
+                {{ key }}: {{ value }}
+            </li>               
+        </ul>
+        {% endfor %}
+    </li>
+</ul>
+{% endfor %}
+
+{% else %}
+    <p><font size="4" color="blue" style="font-family: 'Times New Roman', Times, serif;"> No collision violators in bimolecular reactions detected. </font></p>
+{% endif %}
+{% endif %}
+
+<a href="collision_violation/bokeh_chart">
+    <button type="button">Bokeh_Chart</button>
+</a>
+{% endblock %}

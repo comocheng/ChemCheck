@@ -10,4 +10,8 @@ class ChemkinUpload(forms.ModelForm):
                   'ck_transport_file',
                   'ck_surface_file',)
 
-
+class ReactionCondition(forms.ModelForm):
+    class Meta:
+        model = Mechanism
+        fields = ('temperature',
+                  'pressure')
