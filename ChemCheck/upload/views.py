@@ -159,7 +159,9 @@ def ck2yaml(request, pk):
             elif value_error:
                 suggestion += 'Suggestion: Here is expecting a number instead a string, \nYou can check the source to make sure the data is correct.\nThere could be an indentation error or missing E or unexpected character in that string which confused the system. \nPlease make sure you have got the indents and data format correctly in line {}.'.format(int(match.group(1)))            
             elif duplicate_reaction_type:
-                suggestion += 'Suggestion: You may have two set of parameters for one reaction \n Try to delete the duplicate parameters and convert again .'
+                suggestion += ('Suggestion: You may have two series of parameters for one reaction,'
+                              '\nso the reaction type cannot be determined.'
+                              '\nPlease check your data source to correct your data .')
         elif transport_error:
             suggestion += 'Suggestion: You can manually add the transport data for that species\nor delete the species from mechanism file \nor you can delete the transport file and do the conversion again.'
         mechanism.ct_conversion_errors = error_message
