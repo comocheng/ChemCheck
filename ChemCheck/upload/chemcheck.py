@@ -128,7 +128,7 @@ def err_line_without_comment(path, line_num):
     species starts
     """
     err_line = linecache.getline(path, line_num)
-    if len(err_line) != 0:
+    if len(err_line) != 0 and err_line != '\n':
         if err_line[0] == '!' or err_line[-2] == '!':
             line_num += 1
             err_line = linecache.getline(path, line_num)
@@ -136,7 +136,8 @@ def err_line_without_comment(path, line_num):
         else:
             return err_line, line_num
     else:
-        return err_line
+        line_num += 1
+        return err_line_without_comment(path, line_num)
 
 def list_of_rate_constants_with_same_pressure(rate_constants, index, same_pressure_list):
     """
