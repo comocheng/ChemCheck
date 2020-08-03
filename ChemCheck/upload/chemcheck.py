@@ -315,7 +315,7 @@ class check_collision_violation:
         gas.TP = T, P
         species = {}
         for i, s in enumerate(gas.species()):
-            species[str(s)[9:-1]] = i
+            species[s.name] = i
         self.species = species
         self.gas = gas
         self.T = T
