@@ -535,7 +535,7 @@ def bokeh_chart(request, pk):
         ]
         plot = figure(plot_width=600, plot_height=600, tooltips=TOOLTIPS,
                     title="Reaction Rate Constants Check", x_axis_label="reaction index", 
-                    y_axis_label="logrithm of reaction rate constant(kmol/m^3.s)")
+                    y_axis_label="logrithm of reaction rate constant")
         plot.scatter("x", "y1", color= "blue", source=source, legend_label="forward reaction rate constant")
         plot.scatter("x", "y2", color = "red", source=source, legend_label="reverse reaction rate constant")
         plot.legend.location = "top_left"
