@@ -9,6 +9,7 @@ Next Step: we will test different error files reported in Cantera users group to
 ### Initital setup
 
 Initial setup, installing dependencies using conda:
+```
     $ cd ChemCheck
     $ conda env create -f environment.yml
     $ source activate chemcheck_env
@@ -16,7 +17,7 @@ Initial setup, installing dependencies using conda:
     $ python manage.py makemigrations
     $ python manage.py migrate
     $ python manage.py test
-
+```
 ### Updates
 
 First run or every time someone changes the models:
