@@ -1,5 +1,5 @@
 # ChemCheck
-
+## Please use branch `fix_auth_bugs` for now, the `main` branch is not working at this point
 This project creates a web-based application to visualize and diagnose errors in the conversion of CHEMKIN files to Cantera input files.
 ChemCheck is developed in Django 2.2 and python 3.6, and it allows users edit and convert files on the website. The current version can
 report error messages and codes around the error line when conversion fails. In this moment, we have not covered enough conversion errors.
