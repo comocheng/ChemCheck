@@ -10,6 +10,7 @@ Next Step: we will test different error files reported in Cantera users group to
 
 Initial setup, installing dependencies using conda:
 ```
+    $ git checkout -b fix_auth_bugs
     $ cd ChemCheck
     $ conda env create -f environment.yml
     $ source activate chemcheck_env
