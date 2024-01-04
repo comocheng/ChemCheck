@@ -32,3 +32,10 @@ To launch the server:
     $ python manage.py runserver
 
 then point a browser at http://127.0.0.1:8000/upload/
+
+### Citation
+
+If you want to cite this project, please use https://doi.org/10.17760/D20399888
+```
+@phdthesis{Xu_2020, place={Boston}, title={ChemCheck : a cantera debugging tool to detect chemical and syntax errors in kinetic models}, author={Xu, Chao}, year={2020}, pages={1–53}} 
+```
